@@ -87,4 +87,8 @@ public class Utils
             System.exit(1);
         }
     }
+
+    public static void connecttolocalcluster(Log logger, String ipString, String port){
+        Utils.executeCommand(logger, "sfctl cluster select --endpoint " + "http://" + ipString + ":" + port);
+    }
 }

@@ -1,5 +1,7 @@
 package com.microsoft.servicefabric;
 
+import javax.rmi.CORBA.Util;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -18,11 +20,18 @@ public class DeployLocalMojo extends AbstractMojo
     @Parameter(property = "filePathsOrDirectory", defaultValue = Constants.DefaultResourcePath)
     String filePathsOrDirectory;
 
+    @Parameter(property = "ipAddress", defaultValue = Constants.DefaultIPAddress)
+    String ipAddress;
+
+    @Parameter(property = "port", defaultValue = Constants.DefaultPort)
+    String port;
+
     public Log logger  = getLog();
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
         Utils.checksfctlinstallation(logger);
+        Utils.connecttolocalcluster(logger, ipAddress, port);
         if(filePathsOrDirectory.equals(Constants.DefaultResourcePath)){
             filePathsOrDirectory = Utils.getServicefabricResourceDirectory(logger, project);
         }

@@ -16,4 +16,6 @@ public class Constants
     public static final String DefaultMemoryUsage = "0.5";
     public static final String DefaultReplicaCount = "1";
     public static final String DefaultServiceFabricResourcePath = "NO_RESOURCE_PATH";
+    public static final String DefaultIPAddress = "localhost";
+    public static final String DefaultPort = "19080";
 }

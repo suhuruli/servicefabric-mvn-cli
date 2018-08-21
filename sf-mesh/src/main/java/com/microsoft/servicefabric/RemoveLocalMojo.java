@@ -14,11 +14,18 @@ public class RemoveLocalMojo extends AbstractMojo
     @Parameter(property = "applicationName", required = true)
     String applicationName;
 
+    @Parameter(property = "ipAddress", defaultValue = Constants.DefaultIPAddress)
+    String ipAddress;
+
+    @Parameter(property = "port", defaultValue = Constants.DefaultPort)
+    String port;
+
     public Log logger  = getLog();
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
         Utils.checksfctlinstallation(logger);
+        Utils.connecttolocalcluster(logger, ipAddress, port);
         Utils.executeCommand(logger, "sfctl mesh app delete --application-resource-name " + applicationName);
 	}
 }
