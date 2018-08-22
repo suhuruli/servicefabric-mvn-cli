@@ -6,19 +6,20 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.maven.model.Resource;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.IOUtil;
 
 public class Utils
 {
-    public static void createDirectory(Log logger ,String directoryPath){
+    public static void createDirectory(Log logger ,String directoryPath) throws MojoFailureException{
         try {
             Files.createDirectory(Paths.get(directoryPath));
         } catch (IOException e) {
-            logger.error(String.format("Error while creating directory %s", directoryPath));
             logger.error(e);
-            System.exit(1);
+            throw new MojoFailureException(String.format("Error while creating directory %s", directoryPath));
         }
     }
 
@@ -58,7 +59,7 @@ public class Utils
         return Paths.get(directoryPath, fileOrDirName).toString();
     }
 
-    public static String executeCommand(Log logger,String command){
+    public static String executeCommand(Log logger,String command) throws MojoFailureException, MojoExecutionException{
         try {
             logger.info(String.format("Executing command %s", command));
             Process p = Runtime.getRuntime().exec(command);
@@ -67,28 +68,24 @@ public class Utils
             String stdout = IOUtil.toString(p.getInputStream(), "UTF-8");
             logger.debug(String.format("STDOUT: %s", stdout));
             if(stderr != null && stderr.length() > 0 ){
-                logger.error(String.format("Error while running the %s command", command));
                 logger.error(String.format("STDERR: %s", stderr));
+                throw new MojoFailureException(String.format("Error while running the %s command", command));
             }
             return stdout;
 		} catch (IOException e){
             logger.error(e);
+            throw new MojoExecutionException(String.format("Error while running the %s command", command));
         } catch (InterruptedException e) {
-            logger.error(String.format("Interrupted while running command %s", command));
             logger.error(e);
-        }
-        return null;
-    }
-
-    public static void checksfctlinstallation(Log logger){
-        String output = Utils.executeCommand(logger, "sfctl --help");
-        if(output == null){
-            logger.error("Install sfctl before running this goal");
-            System.exit(1);
+            throw new MojoExecutionException(String.format("Interrupted while running command %s", command));
         }
     }
 
-    public static void connecttolocalcluster(Log logger, String ipString, String port){
+    public static void checksfctlinstallation(Log logger) throws MojoFailureException, MojoExecutionException{
+        Utils.executeCommand(logger, "sfctl --help");
+    }
+
+    public static void connecttolocalcluster(Log logger, String ipString, String port) throws MojoFailureException, MojoExecutionException{
         Utils.executeCommand(logger, "sfctl cluster select --endpoint " + "http://" + ipString + ":" + port);
     }
 }

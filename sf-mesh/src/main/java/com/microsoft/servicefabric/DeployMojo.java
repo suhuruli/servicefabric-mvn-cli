@@ -9,21 +9,36 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugin.logging.Log;
 
+/**
+ * Goal which deploys the mesh application to local cluster or mesh
+ */
 @Mojo( name = "deploy", defaultPhase = LifecyclePhase.NONE )
 public class DeployMojo extends AbstractMojo
 {
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
 
+    /**
+     * Type of deployment local or cloud
+    */
     @Parameter(property = "deploymentType", defaultValue = Constants.LocalDeploymentType)
     String deploymentType;
 
+    /**
+     * Comma seperated resource files or the directory in which the resource files are present
+    */
     @Parameter(property = "filePathsOrDirectory", defaultValue = Constants.DefaultResourcePath)
     String filePathsOrDirectory;
 
+    /**
+     * IP address or domain name of the cluster in which this application should be deployed. Only valid in local deployment type.
+    */
     @Parameter(property = "ipAddress", defaultValue = Constants.DefaultIPAddress)
     String ipAddress;
 
+    /**
+     * HTTP Gateway port of the cluster. Only valid in local deployment type
+    */
     @Parameter(property = "port", defaultValue = Constants.DefaultPort)
     String port;
 
@@ -43,8 +58,7 @@ public class DeployMojo extends AbstractMojo
             //To be implemented
         }
         else{
-            logger.error(String.format("%s deployment type is not vaild", deploymentType));
-            return;
+            throw new MojoExecutionException(String.format("%s deployment type is not vaild", deploymentType));
         }
 	}
 }

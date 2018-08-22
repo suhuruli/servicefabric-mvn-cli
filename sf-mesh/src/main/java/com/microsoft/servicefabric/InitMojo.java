@@ -16,7 +16,7 @@ import java.io.*;
 
 
 /**
- * Goal which create application resources of a project.
+ * Goal which creates initial application resource of a project.
  */
 @Mojo( name = "init", defaultPhase = LifecyclePhase.PROCESS_RESOURCES )
 public class InitMojo extends AbstractMojo
@@ -25,21 +25,27 @@ public class InitMojo extends AbstractMojo
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
 
+    /**
+     * Name of the application
+    */
     @Parameter(property = "applicationName", required = true)
     String applicationName;
 
+    /**
+     * Description of the application
+    */
     @Parameter(property = "applicationDescription", defaultValue = Constants.DefaultApplicationDescription)
     String applicationDescription;
 
     private Log logger  = getLog();
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         String resourceDirectory = Utils.getResourcesDirectory(logger, project);
         String serviceFabricResourcesDirectory = Utils.getServicefabricResourceDirectory(logger, project);
         if(Utils.checkIfExists(serviceFabricResourcesDirectory)){
-            logger.info("Service fabric resources folder already exists!");
-            return;
+            throw new MojoExecutionException("Service Fabric resources folder already exists!");
         }
         else{
             if(!Utils.checkIfExists(resourceDirectory)){
@@ -59,9 +65,8 @@ public class InitMojo extends AbstractMojo
             FileUtils.fileWrite(Utils.getPath(serviceFabricResourcesDirectory, applicationName + ".yaml"), appContent);
             logger.debug("Wrote content to output");
 		} catch (IOException e) {
-            logger.error("Error while writing output");
             logger.error(e);
-            return;
+            throw new MojoFailureException("Error while writing output");
 		}
     }
 }

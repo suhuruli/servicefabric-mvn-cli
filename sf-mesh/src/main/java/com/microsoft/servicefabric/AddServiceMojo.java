@@ -16,7 +16,7 @@ import org.codehaus.plexus.util.IOUtil;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 
 /**
- * Goal which adds a service resources to a project.
+ * Goal which adds a service resource to a project.
  */
 @Mojo( name = "addservice", defaultPhase = LifecyclePhase.PROCESS_RESOURCES )
 public class AddServiceMojo extends AbstractMojo
@@ -24,39 +24,75 @@ public class AddServiceMojo extends AbstractMojo
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
 
+    /**
+     * Name of the application
+    */
     @Parameter(property = "applicationName", required = true)
     String applicationName;
 
+    /**
+     * Name of the service
+    */
     @Parameter(property = "serviceName", required = true)
     String serviceName;
 
+    /**
+     * Container image name of the service
+    */
     @Parameter(property = "imageName", required = true)
     String imageName;
 
+    /**
+     * Description of the service
+    */
     @Parameter(property = "serviceDescription", defaultValue = Constants.DefaultServiceDescription)
     String serviceDescription;
 
+    /**
+     * OS environment on which this service is deployed
+    */
     @Parameter(property = "osType", defaultValue = Constants.DefaultOS)
     String osType;
     
+    /**
+     * Name of the code package
+    */
     @Parameter(property = "codePackageName", defaultValue = Constants.DefaultCodePackageName)
     String codePackageName;
 
+    /**
+     * Name of the listener
+    */
     @Parameter(property = "listenerName", defaultValue = Constants.DefaultListenerName)
     String listenerName;
     
+    /**
+     * Port to expose of the container
+    */
     @Parameter(property = "listenerPort", defaultValue = Constants.DefaultPortNumber)
     String listenerPort;
 
+    /**
+     * Max CPU usage (in cores) of the container
+    */
     @Parameter(property = "cpuUsage", defaultValue = Constants.DefaultCpuUsage)
     String cpuUsage;
 
+    /**
+     * Max Memory usage (in GB) of the container
+    */
     @Parameter(property = "memoryUsage", defaultValue = Constants.DefaultMemoryUsage)
     String memoryUsage;
 
+    /**
+     * Replica count of the container
+    */
     @Parameter(property = "replicaCount", defaultValue = Constants.DefaultReplicaCount)
     String replicaCount;    
 
+    /**
+     * Network resource reference in which the container should be deployed
+    */
     @Parameter(property = "networkRef", defaultValue = Constants.DefaultNetworkRefName)
     String networkRef; 
 
@@ -67,22 +103,18 @@ public class AddServiceMojo extends AbstractMojo
         String resourceDirectory = Utils.getResourcesDirectory(logger, project);
         String serviceFabricResourcesDirectory = Utils.getPath(resourceDirectory, "servicefabric");
         if(!Utils.checkIfExists(serviceFabricResourcesDirectory)){
-            logger.error("Service fabric resources folder does not exist. Please run init goal before running this goal!");
-            return;
+            throw new MojoExecutionException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
         }
         else{
             if(!Utils.checkIfExists(Utils.getPath(serviceFabricResourcesDirectory, applicationName + ".yaml"))){
-                logger.error("Application resource with the specified name does not exist");
-                return;
+                throw new MojoExecutionException("Application resource with the specified name does not exist");
             }
             if(Utils.checkIfExists(Utils.getPath(serviceFabricResourcesDirectory, serviceName + ".yaml"))){
-                logger.error("Service resource with the specified name already exists");
-                return;
+                throw new MojoExecutionException("Resource with the specified name already exists");
             }
             logger.debug(String.format("Using the following directory: %s", resourceDirectory));
             try {
                 InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.ServiceResourceName);
-                logger.debug(String.format("Reading content form the %s", resource));
                 String serviceContent = IOUtil.toString(resource, "UTF-8"); 
                 serviceContent = Utils.replaceString(logger, serviceContent, "APP_NAME", applicationName, Constants.ServiceResourceName);
                 serviceContent = Utils.replaceString(logger, serviceContent, "SERVICE_NAME", serviceName, Constants.ServiceResourceName);
@@ -113,9 +145,8 @@ public class AddServiceMojo extends AbstractMojo
                 FileUtils.fileWrite(Utils.getPath(serviceFabricResourcesDirectory, serviceName + ".yaml"), serviceContent);
                 logger.debug("Wrote content to output");
             } catch (IOException e) {
-                logger.error("Error while writing output");
                 logger.error(e);
-                return;
+                throw new MojoFailureException("Error while writing output");
             }
     
         }

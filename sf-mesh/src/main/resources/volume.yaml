@@ -1,0 +1,10 @@
+volume:
+  schemaVersion: 1.0.0
+  name: VOLUME_NAME
+  properties:
+    description: VOLUME_DESCRIPTION
+    provider: VOLUME_PROVIDER
+    azureFileParameters:
+      shareName: VOLUME_SHARE_NAME
+      accountName: VOLUME_ACCOUNT_NAME
+      accountKey: VOLUME_ACCOUNT_KEY
