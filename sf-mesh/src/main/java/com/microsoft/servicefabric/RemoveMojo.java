@@ -8,9 +8,13 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugin.logging.Log;
 
-@Mojo( name = "removelocal", defaultPhase = LifecyclePhase.NONE )
-public class RemoveLocalMojo extends AbstractMojo
+@Mojo( name = "remove", defaultPhase = LifecyclePhase.NONE )
+public class RemoveMojo extends AbstractMojo
 {
+
+    @Parameter(property = "deploymentType", defaultValue = Constants.LocalDeploymentType)
+    String deploymentType;
+
     @Parameter(property = "applicationName", required = true)
     String applicationName;
 
@@ -24,8 +28,17 @@ public class RemoveLocalMojo extends AbstractMojo
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-        Utils.checksfctlinstallation(logger);
-        Utils.connecttolocalcluster(logger, ipAddress, port);
-        Utils.executeCommand(logger, "sfctl mesh app delete --application-resource-name " + applicationName);
+        if(deploymentType.equalsIgnoreCase(Constants.LocalDeploymentType)){
+            Utils.checksfctlinstallation(logger);
+            Utils.connecttolocalcluster(logger, ipAddress, port);
+            Utils.executeCommand(logger, "sfctl mesh app delete --application-resource-name " + applicationName);
+        }
+        else if(deploymentType.equalsIgnoreCase(Constants.CloudDeploymentType)){
+            //To be implemented
+        }
+        else{
+            logger.error(String.format("%s deployment type is not vaild", deploymentType));
+            return;
+        }
 	}
 }

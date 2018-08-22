@@ -18,4 +18,6 @@ public class Constants
     public static final String DefaultServiceFabricResourcePath = "NO_RESOURCE_PATH";
     public static final String DefaultIPAddress = "localhost";
     public static final String DefaultPort = "19080";
+    public static final String LocalDeploymentType = "local";
+    public static final String CloudDeploymentType = "cloud";
 }
