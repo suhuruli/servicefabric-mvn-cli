@@ -19,17 +19,8 @@ import java.io.*;
  * Goal which creates initial application resource of a project.
  */
 @Mojo( name = "init", defaultPhase = LifecyclePhase.PROCESS_RESOURCES )
-public class InitMojo extends AbstractMojo
+public class InitMojo extends AddServiceMojo
 {
-
-    @Parameter(defaultValue = "${project}", required = true, readonly = true)
-    MavenProject project;
-
-    /**
-     * Name of the application
-    */
-    @Parameter(property = "applicationName", required = true)
-    String applicationName;
 
     /**
      * Description of the application
@@ -64,6 +55,8 @@ public class InitMojo extends AbstractMojo
             appContent = Utils.replaceString(logger, appContent, "APP_DESCRIPTION", applicationDescription, Constants.ApplicationResourceName);
             FileUtils.fileWrite(Utils.getPath(serviceFabricResourcesDirectory, applicationName + ".yaml"), appContent);
             logger.debug("Wrote content to output");
+            logger.debug("Adding Service");
+            addService();
 		} catch (IOException e) {
             logger.error(e);
             throw new MojoFailureException("Error while writing output");

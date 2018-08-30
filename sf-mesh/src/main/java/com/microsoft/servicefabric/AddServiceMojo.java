@@ -100,6 +100,10 @@ public class AddServiceMojo extends AbstractMojo
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+        addService();
+    }
+    
+    public void addService() throws MojoExecutionException, MojoFailureException{
         String resourceDirectory = Utils.getResourcesDirectory(logger, project);
         String serviceFabricResourcesDirectory = Utils.getPath(resourceDirectory, "servicefabric");
         if(!Utils.checkIfExists(serviceFabricResourcesDirectory)){
@@ -107,7 +111,7 @@ public class AddServiceMojo extends AbstractMojo
         }
         else{
             if(!Utils.checkIfExists(Utils.getPath(serviceFabricResourcesDirectory, applicationName + ".yaml"))){
-                throw new MojoExecutionException("Application resource with the specified name does not exist");
+                throw new MojoExecutionException(String.format("Application resource with the name %s does not exist", applicationName));
             }
             if(Utils.checkIfExists(Utils.getPath(serviceFabricResourcesDirectory, serviceName + ".yaml"))){
                 throw new MojoExecutionException("Resource with the specified name already exists");
@@ -150,5 +154,5 @@ public class AddServiceMojo extends AbstractMojo
             }
     
         }
-	}
+    }
 }
