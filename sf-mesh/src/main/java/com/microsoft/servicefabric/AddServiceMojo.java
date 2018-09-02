@@ -104,19 +104,19 @@ public class AddServiceMojo extends AbstractMojo
     }
     
     public void addService() throws MojoExecutionException, MojoFailureException{
-        String resourceDirectory = Utils.getResourcesDirectory(logger, project);
-        String serviceFabricResourcesDirectory = Utils.getPath(resourceDirectory, "servicefabric");
+        String serviceFabricResourcesDirectory = Utils.getServicefabricResourceDirectory(logger, project);
+        String appResourcesDirectory = Utils.getAppResourcesDirectory(logger, project);
+        String serviceDirectory = Utils.getPath(serviceFabricResourcesDirectory, serviceName);
         if(!Utils.checkIfExists(serviceFabricResourcesDirectory)){
             throw new MojoExecutionException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
         }
         else{
-            if(!Utils.checkIfExists(Utils.getPath(serviceFabricResourcesDirectory, applicationName + ".yaml"))){
+            if(!Utils.checkIfExists(Utils.getPath(appResourcesDirectory, applicationName + ".yaml"))){
                 throw new MojoExecutionException(String.format("Application resource with the name %s does not exist", applicationName));
             }
-            if(Utils.checkIfExists(Utils.getPath(serviceFabricResourcesDirectory, serviceName + ".yaml"))){
+            if(Utils.checkIfExists(serviceDirectory)){
                 throw new MojoExecutionException("Resource with the specified name already exists");
             }
-            logger.debug(String.format("Using the following directory: %s", resourceDirectory));
             try {
                 InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.ServiceResourceName);
                 String serviceContent = IOUtil.toString(resource, "UTF-8"); 
@@ -146,7 +146,8 @@ public class AddServiceMojo extends AbstractMojo
                     networkRef = applicationName + "Network";
                 }
                 serviceContent = Utils.replaceString(logger, serviceContent, "NETWORK_NAME", networkRef, Constants.ServiceResourceName);
-                FileUtils.fileWrite(Utils.getPath(serviceFabricResourcesDirectory, serviceName + ".yaml"), serviceContent);
+                Utils.createDirectory(logger, serviceDirectory);
+                FileUtils.fileWrite(Utils.getPath(serviceDirectory, serviceName + ".yaml"), serviceContent);
                 logger.debug("Wrote content to output");
             } catch (IOException e) {
                 logger.error(e);

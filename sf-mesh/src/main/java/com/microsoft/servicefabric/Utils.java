@@ -3,9 +3,7 @@ package com.microsoft.servicefabric;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 
-import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
@@ -37,22 +35,22 @@ public class Utils
         return content.replace(originalString, replaceString);
     }
 
-    public static String getResourcesDirectory(Log logger, MavenProject project){
-        String resourceDirectory;
-        List<Resource> resources = project.getResources();
-        logger.debug(String.format("No of resources present %d", resources.size()));
-        if(resources.size() == 0){
-            resourceDirectory = project.getBasedir().toString().concat(Constants.DefaultResourcePath);
-            logger.debug("resource directory is not present so will be creating one");
+    public static String getSrcDirectory(Log logger, MavenProject project) throws MojoFailureException {
+        String srcPath = Paths.get(project.getBasedir().toString(), Constants.DefaultSrcPath).toString();
+        logger.debug(String.format("Got SRC path as %s", srcPath));
+        if (!checkIfExists(srcPath)){
+            logger.info(String.format("SRC Path %s does not exist creating one", srcPath));
+            createDirectory(logger, srcPath);
         }
-        else{
-            resourceDirectory = resources.get(0).getDirectory();
-        }
-        return resourceDirectory;
+        return srcPath;
     }
 
-    public static String getServicefabricResourceDirectory(Log logger, MavenProject project){
-        return Paths.get(getResourcesDirectory(logger, project), "servicefabric").toString();
+    public static String getServicefabricResourceDirectory(Log logger, MavenProject project) throws MojoFailureException {
+        return Paths.get(getSrcDirectory(logger, project), "Service Fabric Resources").toString();
+    }
+
+    public static String getAppResourcesDirectory(Log logger, MavenProject project) throws MojoFailureException {
+        return Paths.get(getServicefabricResourceDirectory(logger, project), "App Resources").toString();
     }
 
     public static String getPath(String directoryPath, String fileOrDirName){

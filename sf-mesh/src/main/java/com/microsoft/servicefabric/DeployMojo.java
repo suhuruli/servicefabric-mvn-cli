@@ -27,7 +27,7 @@ public class DeployMojo extends AbstractMojo
     /**
      * Comma seperated resource files or the directory in which the resource files are present
     */
-    @Parameter(property = "filePathsOrDirectory", defaultValue = Constants.DefaultResourcePath)
+    @Parameter(property = "filePathsOrDirectory", defaultValue = Constants.ServiceFabricResourcesPath)
     String filePathsOrDirectory;
 
     /**
@@ -49,7 +49,7 @@ public class DeployMojo extends AbstractMojo
         if(deploymentType.equalsIgnoreCase(Constants.LocalDeploymentType)){
             Utils.checksfctlinstallation(logger);
             Utils.connecttolocalcluster(logger, ipAddress, port);
-            if(filePathsOrDirectory.equals(Constants.DefaultResourcePath)){
+            if(filePathsOrDirectory.equals(Constants.ServiceFabricResourcesPath)){
                 filePathsOrDirectory = Utils.getServicefabricResourceDirectory(logger, project);
             }
             Utils.executeCommand(logger, "sfctl mesh deployment create --file-paths-or-directory " + filePathsOrDirectory);

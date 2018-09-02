@@ -64,13 +64,13 @@ public class AddVolumeMojo extends AbstractMojo
 	
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		String resourceDirectory = Utils.getResourcesDirectory(logger, project);
-        String serviceFabricResourcesDirectory = Utils.getPath(resourceDirectory, "servicefabric");
+		String serviceFabricResourcesDirectory = Utils.getServicefabricResourceDirectory(logger, project);
+		String appResourcesDirectory = Utils.getAppResourcesDirectory(logger, project);
         if(!Utils.checkIfExists(serviceFabricResourcesDirectory)){
         	throw new MojoExecutionException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
         }
         else{
-            if(Utils.checkIfExists(Utils.getPath(serviceFabricResourcesDirectory,  volumeName + ".yaml"))){
+            if(Utils.checkIfExists(Utils.getPath(appResourcesDirectory,  volumeName + ".yaml"))){
                 throw new MojoExecutionException("Resource with the specified name already exists");
 			}
 			InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.VolumeResourceName);
@@ -88,7 +88,7 @@ public class AddVolumeMojo extends AbstractMojo
 				}
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_NAME", volumeAccountName, Constants.VolumeResourceName);
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_KEY", volumeAccountKey, Constants.VolumeResourceName);
-				FileUtils.fileWrite(Utils.getPath(serviceFabricResourcesDirectory, volumeName + ".yaml"), volumeContent);
+				FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, volumeName + ".yaml"), volumeContent);
 				logger.debug("Wrote content to output");
 
 			} catch (IOException e) {
