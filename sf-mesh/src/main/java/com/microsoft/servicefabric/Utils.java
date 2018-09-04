@@ -46,11 +46,11 @@ public class Utils
     }
 
     public static String getServicefabricResourceDirectory(Log logger, MavenProject project) throws MojoFailureException {
-        return Paths.get(getSrcDirectory(logger, project), "Service Fabric Resources").toString();
+        return Paths.get(getSrcDirectory(logger, project), "servicefabric").toString();
     }
 
     public static String getAppResourcesDirectory(Log logger, MavenProject project) throws MojoFailureException {
-        return Paths.get(getServicefabricResourceDirectory(logger, project), "App Resources").toString();
+        return Paths.get(getServicefabricResourceDirectory(logger, project), "appresources").toString();
     }
 
     public static String getPath(String directoryPath, String fileOrDirName){
