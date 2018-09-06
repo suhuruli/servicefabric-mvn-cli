@@ -2,8 +2,7 @@ package com.microsoft.servicefabric;
 
 public class Constants
 {
-    public static final String DefaultSrcPath = "src";
-    public static final String ServiceFabricResourcesPath = "src/servicefabricresources";
+    public static final String ServiceFabricResourcesPath = "servicefabric";
     public static final String ApplicationResourceName = "app.yaml";
     public static final String ServiceResourceName = "service.yaml";
     public static final String VolumeResourceName = "volume.yaml";

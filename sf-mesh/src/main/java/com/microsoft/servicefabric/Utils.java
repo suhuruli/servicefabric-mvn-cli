@@ -35,18 +35,8 @@ public class Utils
         return content.replace(originalString, replaceString);
     }
 
-    public static String getSrcDirectory(Log logger, MavenProject project) throws MojoFailureException {
-        String srcPath = Paths.get(project.getBasedir().toString(), Constants.DefaultSrcPath).toString();
-        logger.debug(String.format("Got SRC path as %s", srcPath));
-        if (!checkIfExists(srcPath)){
-            logger.info(String.format("SRC Path %s does not exist creating one", srcPath));
-            createDirectory(logger, srcPath);
-        }
-        return srcPath;
-    }
-
     public static String getServicefabricResourceDirectory(Log logger, MavenProject project) throws MojoFailureException {
-        return Paths.get(getSrcDirectory(logger, project), "servicefabric").toString();
+        return Paths.get(project.getBasedir().toString(), "servicefabric").toString();
     }
 
     public static String getAppResourcesDirectory(Log logger, MavenProject project) throws MojoFailureException {
