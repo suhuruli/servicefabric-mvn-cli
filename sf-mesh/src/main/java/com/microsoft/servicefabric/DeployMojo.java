@@ -1,7 +1,6 @@
 package com.microsoft.servicefabric;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -45,7 +44,12 @@ public class DeployMojo extends AbstractMojo
     public Log logger  = getLog();
 
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	public void execute() throws MojoFailureException {
+        Utils.getjsonfrommergetool(logger, deploymentType, project);
+        /*String serviceFabricResourcesDirectory = Utils.getServicefabricResourceDirectory(logger, project);
+        if(!Utils.checkIfExists(serviceFabricResourcesDirectory)){
+            throw new MojoFailureException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
+        }
         if(deploymentType.equalsIgnoreCase(Constants.LocalDeploymentType)){
             Utils.checksfctlinstallation(logger);
             Utils.connecttolocalcluster(logger, ipAddress, port);
@@ -58,7 +62,7 @@ public class DeployMojo extends AbstractMojo
             //To be implemented
         }
         else{
-            throw new MojoExecutionException(String.format("%s deployment type is not vaild", deploymentType));
-        }
+            throw new MojoFailureException(String.format("%s deployment type is not vaild", deploymentType));
+        }*/
 	}
 }

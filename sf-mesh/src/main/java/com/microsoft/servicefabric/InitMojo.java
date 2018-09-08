@@ -1,6 +1,5 @@
 package com.microsoft.servicefabric;
 
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -28,14 +27,11 @@ public class InitMojo extends AddServiceMojo
     private Log logger  = getLog();
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException
+    public void execute() throws MojoFailureException
     {
         String serviceFabricResourcesDirectory = Utils.getServicefabricResourceDirectory(logger, project);
         String appResourcesDirectory = Utils.getAppResourcesDirectory(logger, project);
-        if(Utils.checkIfExists(serviceFabricResourcesDirectory)){
-            throw new MojoExecutionException("Service Fabric resources folder already exists!");
-        }
-        else{
+        if(!Utils.checkIfExists(serviceFabricResourcesDirectory)){
             logger.debug(String.format("Creating service fabric resources directory %s", serviceFabricResourcesDirectory));
             Utils.createDirectory(logger, serviceFabricResourcesDirectory);
         }
@@ -47,9 +43,9 @@ public class InitMojo extends AddServiceMojo
             String appContent = IOUtil.toString(resource, "UTF-8"); 
             appContent = Utils.replaceString(logger, appContent, "APP_NAME", applicationName, Constants.ApplicationResourceName);
             appContent = Utils.replaceString(logger, appContent, "APP_DESCRIPTION", applicationDescription, Constants.ApplicationResourceName);
-            String appYamlPath = Utils.getPath(appResourcesDirectory, applicationName + ".yaml");
+            String appYamlPath = Utils.getPath(appResourcesDirectory, "app_" + applicationName + ".yaml");
             if(Utils.checkIfExists(appYamlPath)){
-                throw new MojoExecutionException(String.format("App resource with the name %s already exists", applicationName));
+                throw new MojoFailureException(String.format("App resource with the name %s already exists", applicationName));
             }
             else{
                 FileUtils.fileWrite(appYamlPath, appContent);

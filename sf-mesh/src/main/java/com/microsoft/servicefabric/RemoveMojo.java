@@ -1,10 +1,10 @@
 package com.microsoft.servicefabric;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugin.logging.Log;
 
@@ -14,6 +14,9 @@ import org.apache.maven.plugin.logging.Log;
 @Mojo( name = "remove", defaultPhase = LifecyclePhase.NONE )
 public class RemoveMojo extends AbstractMojo
 {
+
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
+    MavenProject project;
 
     /**
      * Type of deployment local or cloud
@@ -42,7 +45,11 @@ public class RemoveMojo extends AbstractMojo
     public Log logger  = getLog();
 
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	public void execute() throws MojoFailureException {
+        String serviceFabricResourcesDirectory = Utils.getServicefabricResourceDirectory(logger, project);
+        if(!Utils.checkIfExists(serviceFabricResourcesDirectory)){
+            throw new MojoFailureException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
+        }
         if(deploymentType.equalsIgnoreCase(Constants.LocalDeploymentType)){
             Utils.checksfctlinstallation(logger);
             Utils.connecttolocalcluster(logger, ipAddress, port);
@@ -52,7 +59,7 @@ public class RemoveMojo extends AbstractMojo
             //To be implemented
         }
         else{
-            throw new MojoExecutionException(String.format("%s deployment type is not vaild", deploymentType));
+            throw new MojoFailureException(String.format("%s deployment type is not vaild", deploymentType));
         }
 	}
 }
