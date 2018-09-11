@@ -70,7 +70,7 @@ public class AddVolumeMojo extends AbstractMojo
         }
         else{
             if(Utils.checkIfExists(Utils.getPath(appResourcesDirectory, "volume_" + volumeName + ".yaml"))){
-                throw new MojoFailureException("Resource with the specified name already exists");
+                throw new MojoFailureException("Volume Resource with the specified name already exists");
 			}
 			InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.VolumeResourceName);
 			try {

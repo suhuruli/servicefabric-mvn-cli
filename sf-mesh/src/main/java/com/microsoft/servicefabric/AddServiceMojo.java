@@ -2,6 +2,7 @@ package com.microsoft.servicefabric;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -114,7 +115,7 @@ public class AddServiceMojo extends AbstractMojo
                 throw new MojoFailureException(String.format("Application resource with the name %s does not exist", applicationName));
             }
             if(Utils.checkIfExists(serviceDirectory)){
-                throw new MojoFailureException("Resource with the specified name already exists");
+                throw new MojoFailureException("Service Resource with the specified name already exists");
             }
             try {
                 InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.ServiceResourceName);
@@ -141,10 +142,13 @@ public class AddServiceMojo extends AbstractMojo
                 serviceContent = Utils.replaceString(logger, serviceContent, "CPU_USAGE", cpuUsage, Constants.ServiceResourceName);
                 serviceContent = Utils.replaceString(logger, serviceContent, "MEMORY_USAGE", memoryUsage, Constants.ServiceResourceName);
                 serviceContent = Utils.replaceString(logger, serviceContent, "REPLICA_COUNT", replicaCount, Constants.ServiceResourceName);
-                if(networkRef.equals(Constants.DefaultNetworkRefName)){
-                    networkRef = applicationName + "Network";
+                if(!networkRef.equals(Constants.DefaultNetworkRefName)){
+                    System.out.print(serviceContent);
+                    String serviceContentString="          networkRefs:\n" + 
+                    "            - name: NETWORK_NAME";
+                    serviceContent += serviceContentString;
+                    serviceContent = Utils.replaceString(logger, serviceContent, "NETWORK_NAME", networkRef, Constants.ServiceResourceName);
                 }
-                serviceContent = Utils.replaceString(logger, serviceContent, "NETWORK_NAME", networkRef, Constants.ServiceResourceName);
                 Utils.createDirectory(logger, serviceDirectory);
                 FileUtils.fileWrite(Utils.getPath(serviceDirectory, "service_" + serviceName + ".yaml"), serviceContent);
                 logger.debug("Wrote content to output");
