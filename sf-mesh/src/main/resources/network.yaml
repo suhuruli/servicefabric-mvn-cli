@@ -1,0 +1,6 @@
+network:
+  schemaVersion: 1.0.0
+  name: NETWORK_NAME
+  properties:
+    description: NETWORK_DESCRIPTION
+    addressPrefix: ADDRESS_PREFIX

@@ -2,10 +2,10 @@ package com.microsoft.servicefabric;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -99,23 +99,23 @@ public class AddServiceMojo extends AbstractMojo
     private Log logger  = getLog();
 
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	public void execute() throws MojoFailureException {
         addService();
     }
     
-    public void addService() throws MojoExecutionException, MojoFailureException{
+    public void addService() throws MojoFailureException{
         String serviceFabricResourcesDirectory = Utils.getServicefabricResourceDirectory(logger, project);
         String appResourcesDirectory = Utils.getAppResourcesDirectory(logger, project);
         String serviceDirectory = Utils.getPath(serviceFabricResourcesDirectory, serviceName);
         if(!Utils.checkIfExists(serviceFabricResourcesDirectory)){
-            throw new MojoExecutionException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
+            throw new MojoFailureException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
         }
         else{
-            if(!Utils.checkIfExists(Utils.getPath(appResourcesDirectory, applicationName + ".yaml"))){
-                throw new MojoExecutionException(String.format("Application resource with the name %s does not exist", applicationName));
+            if(!Utils.checkIfExists(Utils.getPath(appResourcesDirectory, "app_" + applicationName + ".yaml"))){
+                throw new MojoFailureException(String.format("Application resource with the name %s does not exist", applicationName));
             }
             if(Utils.checkIfExists(serviceDirectory)){
-                throw new MojoExecutionException("Resource with the specified name already exists");
+                throw new MojoFailureException("Service Resource with the specified name already exists");
             }
             try {
                 InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.ServiceResourceName);
@@ -142,12 +142,14 @@ public class AddServiceMojo extends AbstractMojo
                 serviceContent = Utils.replaceString(logger, serviceContent, "CPU_USAGE", cpuUsage, Constants.ServiceResourceName);
                 serviceContent = Utils.replaceString(logger, serviceContent, "MEMORY_USAGE", memoryUsage, Constants.ServiceResourceName);
                 serviceContent = Utils.replaceString(logger, serviceContent, "REPLICA_COUNT", replicaCount, Constants.ServiceResourceName);
-                if(networkRef.equals(Constants.DefaultNetworkRefName)){
-                    networkRef = applicationName + "Network";
+                if(!networkRef.equals(Constants.DefaultNetworkRefName)){
+                    String serviceContentString="          networkRefs:\n" + 
+                    "            - name: NETWORK_NAME";
+                    serviceContent += serviceContentString;
+                    serviceContent = Utils.replaceString(logger, serviceContent, "NETWORK_NAME", networkRef, Constants.ServiceResourceName);
                 }
-                serviceContent = Utils.replaceString(logger, serviceContent, "NETWORK_NAME", networkRef, Constants.ServiceResourceName);
                 Utils.createDirectory(logger, serviceDirectory);
-                FileUtils.fileWrite(Utils.getPath(serviceDirectory, serviceName + ".yaml"), serviceContent);
+                FileUtils.fileWrite(Utils.getPath(serviceDirectory, "service_" + serviceName + ".yaml"), serviceContent);
                 logger.debug("Wrote content to output");
             } catch (IOException e) {
                 logger.error(e);

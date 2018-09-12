@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -63,15 +62,15 @@ public class AddVolumeMojo extends AbstractMojo
 	public Log logger  = getLog();
 	
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	public void execute() throws MojoFailureException {
 		String serviceFabricResourcesDirectory = Utils.getServicefabricResourceDirectory(logger, project);
 		String appResourcesDirectory = Utils.getAppResourcesDirectory(logger, project);
         if(!Utils.checkIfExists(serviceFabricResourcesDirectory)){
-        	throw new MojoExecutionException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
+        	throw new MojoFailureException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
         }
         else{
-            if(Utils.checkIfExists(Utils.getPath(appResourcesDirectory,  volumeName + ".yaml"))){
-                throw new MojoExecutionException("Resource with the specified name already exists");
+            if(Utils.checkIfExists(Utils.getPath(appResourcesDirectory, "volume_" + volumeName + ".yaml"))){
+                throw new MojoFailureException("Volume Resource with the specified name already exists");
 			}
 			InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.VolumeResourceName);
 			try {
@@ -88,7 +87,7 @@ public class AddVolumeMojo extends AbstractMojo
 				}
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_NAME", volumeAccountName, Constants.VolumeResourceName);
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_KEY", volumeAccountKey, Constants.VolumeResourceName);
-				FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, volumeName + ".yaml"), volumeContent);
+				FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "volume_" + volumeName + ".yaml"), volumeContent);
 				logger.debug("Wrote content to output");
 
 			} catch (IOException e) {
