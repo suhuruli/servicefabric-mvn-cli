@@ -17,11 +17,9 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
-import org.eclipse.aether.repository.LocalArtifactRegistration;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.yaml.snakeyaml.Yaml;
 
 public class Utils
 {
@@ -216,7 +214,7 @@ public class Utils
         }
         Utils.createDirectory(logger, outputPath);
         if(isWindows()){
-            Utils.executeCommand(logger, String.format("%s %s /outputFormat:%s /out:%s",toolExePath, inputFiles, outputFormat, outputPath));
+            Utils.executeCommand(logger, String.format("%s.exe %s /outputFormat:%s /out:%s",toolExePath, inputFiles, outputFormat, outputPath));
         }
         else{
             Utils.executeCommand(logger, String.format("chmod a+x %s", toolExePath));
@@ -242,15 +240,5 @@ public class Utils
             logger.error(e);
             throw new MojoFailureException(String.format("%s ParseException", file.getName()));
 		}
-    }
-
-    public static String randomAlphaNumeric(int count) {
-        String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        StringBuilder builder = new StringBuilder();
-        while (count-- != 0) {
-        int character = (int)(Math.random()*ALPHA_NUMERIC_STRING.length());
-        builder.append(ALPHA_NUMERIC_STRING.charAt(character));
-        }
-        return builder.toString();
     }
 }

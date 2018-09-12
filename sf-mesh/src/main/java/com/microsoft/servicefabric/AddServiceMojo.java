@@ -143,7 +143,6 @@ public class AddServiceMojo extends AbstractMojo
                 serviceContent = Utils.replaceString(logger, serviceContent, "MEMORY_USAGE", memoryUsage, Constants.ServiceResourceName);
                 serviceContent = Utils.replaceString(logger, serviceContent, "REPLICA_COUNT", replicaCount, Constants.ServiceResourceName);
                 if(!networkRef.equals(Constants.DefaultNetworkRefName)){
-                    System.out.print(serviceContent);
                     String serviceContentString="          networkRefs:\n" + 
                     "            - name: NETWORK_NAME";
                     serviceContent += serviceContentString;
