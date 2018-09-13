@@ -72,7 +72,13 @@ public class Utils
     public static String executeCommand(Log logger,String command) throws MojoFailureException{
         try {
             logger.info(String.format("Executing command %s", command));
-            Process p = Runtime.getRuntime().exec(command);
+            Process p;
+            if(Utils.isWindows()){
+                p = Runtime.getRuntime().exec("cmd.exe /C" +command);
+            }
+            else{
+                p = Runtime.getRuntime().exec(command);
+            }
             p.waitFor();
             int exitCode = p.exitValue();
             String stderr = IOUtil.toString(p.getErrorStream(), "UTF-8");
@@ -101,7 +107,8 @@ public class Utils
     public static String executeCommand(Log logger,String[] command) throws MojoFailureException{
         try {
             logger.info(String.format("Executing command %s", Arrays.toString(command)));
-            Process p = Runtime.getRuntime().exec(command);
+            Process p;
+            p = Runtime.getRuntime().exec(command);
             p.waitFor();
             int exitCode = p.exitValue();
             String stderr = IOUtil.toString(p.getErrorStream(), "UTF-8");
@@ -127,11 +134,21 @@ public class Utils
         }
     }
     public static void checksfctlinstallation(Log logger) throws MojoFailureException{
-        Utils.executeCommand(logger, "sfctl --help >> /dev/null");
+        if(Utils.isWindows()){
+            Utils.executeCommand(logger, "sfctl --help  > NUL 2>&1");
+        }
+        else{
+            Utils.executeCommand(logger, "sfctl --help >> /dev/null 2>&1");
+        }
     }
 
     public static void checkazinstallation(Log logger) throws MojoFailureException{
-        Utils.executeCommand(logger, "az mesh --help >> /dev/null");
+        if(Utils.isWindows()){
+            Utils.executeCommand(logger, "az mesh --help > NUL 2>&1");
+        }
+        else{
+            Utils.executeCommand(logger, "az mesh --help >> /dev/null 2>&1");
+        }
     }
 
     public static void connecttolocalcluster(Log logger, String ipString, String port) throws MojoFailureException{

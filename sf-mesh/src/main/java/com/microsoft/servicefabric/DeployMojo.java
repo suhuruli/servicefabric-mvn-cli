@@ -4,12 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.Arrays;
-
-import javax.rmi.CORBA.Util;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
@@ -97,7 +93,12 @@ public class DeployMojo extends AbstractMojo
             logger.info("Perform deployment");
             String path = Utils.getPath(Utils.getServicefabricResourceDirectory(logger, project), "cloud");
             File[] rpjson = new File(path).listFiles();
-            Utils.executeCommand(logger, new String[]{"sh", "-c", String.format("az mesh deployment create --resource-group %s --template-file %s  --parameters \"{'location': {'value': '%s'}}\"", resourceGroup, rpjson[0], location)});
+            if(Utils.isWindows()){
+                Utils.executeCommand(logger, String.format("az mesh deployment create --resource-group %s --template-file %s  --parameters \"{'location': {'value': '%s'}}\"", resourceGroup, rpjson[0], location));
+            }
+            else{
+                Utils.executeCommand(logger, new String[]{"sh", "-c", String.format("az mesh deployment create --resource-group %s --template-file %s  --parameters \"{'location': {'value': '%s'}}\"", resourceGroup, rpjson[0], location)});
+            }
 
         }
         else{

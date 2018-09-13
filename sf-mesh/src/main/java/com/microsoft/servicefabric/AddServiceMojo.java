@@ -2,7 +2,6 @@ package com.microsoft.servicefabric;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.Random;
 
 import org.apache.maven.plugin.AbstractMojo;

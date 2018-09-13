@@ -1,6 +1,5 @@
 package com.microsoft.servicefabric;
 
-import java.awt.List;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Random;
