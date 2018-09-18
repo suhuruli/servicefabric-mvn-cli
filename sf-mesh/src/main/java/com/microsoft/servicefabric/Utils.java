@@ -160,8 +160,15 @@ public class Utils
     }
 
     public static String checkmergetoolpresence(Log logger) throws MojoFailureException{
-        String localRepoPath = Utils.executeCommand(logger, "mvn help:evaluate -Dexpression=settings.localRepository -q -DforceStdout");
-        String toolPath = Utils.getPath(localRepoPath, "SfSbzYamlMergeCore");
+        String localRepoPath;
+        if(Utils.isWindows()){
+            localRepoPath = Utils.executeCommand(logger, "mvn help:evaluate -Dexpression=settings.localRepository -DforceStdout | findstr repository");
+        }
+        else{
+            localRepoPath = Utils.executeCommand(logger, new String[]{"sh", "-c", "mvn help:evaluate -Dexpression=settings.localRepository -DforceStdout | grep repository"});
+        }
+
+        String toolPath = Utils.getPath(localRepoPath.replace("\n", "").replace("\r", ""), "SfSbzYamlMergeCore");
         Utils.checkIfExists(toolPath);
         return toolPath;
     }
