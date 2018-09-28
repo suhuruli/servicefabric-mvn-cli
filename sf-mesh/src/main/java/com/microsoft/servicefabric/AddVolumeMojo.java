@@ -89,7 +89,7 @@ public class AddVolumeMojo extends AbstractMojo
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_KEY", volumeAccountKey, Constants.VolumeResourceName);
 				FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "volume_" + volumeName + ".yaml"), volumeContent);
 				logger.debug("Wrote content to output");
-
+				TelemetryHelper.sendEvent(TelemetryEventType.AddVolumeMojo, String.format("Added volume with name: %s", volumeName), logger);
 			} catch (IOException e) {
 				logger.error(e);
 				throw new MojoFailureException("Error while writing output");

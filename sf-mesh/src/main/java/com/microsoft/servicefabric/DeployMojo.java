@@ -76,7 +76,7 @@ public class DeployMojo extends AbstractMojo
             Utils.connecttolocalcluster(logger, ipAddress, port);
             Utils.executeCommand(logger, "sfctl mesh deployment create --file-paths-or-directory " + filePathsOrDirectory);*/
             listAndDeployResourcesLocal();
-
+            TelemetryHelper.sendEvent(TelemetryEventType.DeployMojo, String.format("Deployed application locally"), logger);
         }
         else if(deploymentType.equalsIgnoreCase(Constants.CloudDeploymentType)){
             //To be implemented
@@ -99,7 +99,7 @@ public class DeployMojo extends AbstractMojo
             else{
                 Utils.executeCommand(logger, new String[]{"sh", "-c", String.format("az mesh deployment create --resource-group %s --template-file %s  --parameters \"{'location': {'value': '%s'}}\"", resourceGroup, rpjson[0], location)});
             }
-
+            TelemetryHelper.sendEvent(TelemetryEventType.DeployMojo, String.format("Deployed application on mesh"), logger);
         }
         else{
             throw new MojoFailureException(String.format("%s deployment type is not valid", deploymentType));

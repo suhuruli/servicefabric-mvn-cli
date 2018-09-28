@@ -150,6 +150,7 @@ public class AddServiceMojo extends AbstractMojo
                 Utils.createDirectory(logger, serviceDirectory);
                 FileUtils.fileWrite(Utils.getPath(serviceDirectory, "service_" + serviceName + ".yaml"), serviceContent);
                 logger.debug("Wrote content to output");
+                TelemetryHelper.sendEvent(TelemetryEventType.AddServiceMojo, String.format("Added service with name: %s", serviceName), logger);
             } catch (IOException e) {
                 logger.error(e);
                 throw new MojoFailureException("Error while writing output");

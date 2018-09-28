@@ -112,7 +112,7 @@ public class AddNetworkMojo extends AbstractMojo
                 }
                 FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "network_" + networkRef + ".yaml"), networkContent);
 				logger.debug("Wrote content to output");
-
+                TelemetryHelper.sendEvent(TelemetryEventType.AddNetworkMojo, String.format("Added network with name: %s", serviceName), logger);
             }
             catch (IOException e) {
 				logger.error(e);
