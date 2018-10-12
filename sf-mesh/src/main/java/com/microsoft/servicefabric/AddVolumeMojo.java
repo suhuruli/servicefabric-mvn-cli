@@ -20,6 +20,12 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 public class AddVolumeMojo extends AbstractMojo
 {
 
+    /**
+     * schema version of the network yaml to be generated
+    */
+    @Parameter(property = "schemaVersion", defaultValue = Constants.DefaultSchemaVersion)
+	String schemaVersion;
+
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
 	MavenProject project;
 
@@ -44,19 +50,19 @@ public class AddVolumeMojo extends AbstractMojo
 	/**
      * Name of the volume share
     */
-    @Parameter(property = "volumeShareName", defaultValue = Constants.DefaultVolumeShareName)
+    @Parameter(property = "volumeShareName", required = true)
 	String volumeShareName;
 
 	/**
      * Name of the volume account
     */
-    @Parameter(property = "volumeAccountName", defaultValue = Constants.DefaultVolumeAccountName)
+    @Parameter(property = "volumeAccountName", required = true)
 	String volumeAccountName;
 
 	/**
      * Key of the volume account 
     */
-    @Parameter(property = "volumeAccountKey", defaultValue = Constants.DefaultVolumeAccountKey)
+    @Parameter(property = "volumeAccountKey", required = true)
 	String volumeAccountKey;
 
 	public Log logger  = getLog();
@@ -78,13 +84,6 @@ public class AddVolumeMojo extends AbstractMojo
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_NAME", volumeName, Constants.VolumeResourceName);
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_DESCRIPTION", volumeDescription, Constants.VolumeResourceName);
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_PROVIDER", volumeProvider, Constants.VolumeResourceName);
-				if(volumeShareName.equals(Constants.DefaultVolumeShareName)){
-					volumeShareName = volumeName + "Share";
-				}
-				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_SHARE_NAME", volumeShareName, Constants.VolumeResourceName);
-				if(volumeAccountName.equals(Constants.DefaultVolumeAccountName)){
-					volumeAccountName = volumeName + "Account";
-				}
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_NAME", volumeAccountName, Constants.VolumeResourceName);
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_KEY", volumeAccountKey, Constants.VolumeResourceName);
 				FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "volume_" + volumeName + ".yaml"), volumeContent);

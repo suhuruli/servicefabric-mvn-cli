@@ -74,7 +74,7 @@ public class RemoveMojo extends AbstractMojo
             removeApplicationLocal();
             TelemetryHelper.sendEvent(TelemetryEventType.RemoveMojo, String.format("Removed application %s locally", applicationName), logger);
         }
-        else if(deploymentType.equalsIgnoreCase(Constants.CloudDeploymentType)){
+        else if(deploymentType.equalsIgnoreCase(Constants.MeshDeploymentType)){
             //To be implemented
             if(resourceGroup.equalsIgnoreCase(Constants.DefaultResourceGroup)){
                 throw new MojoFailureException("Resource Group is not mentioned. Please mention the resource group in which your application is deployed");    

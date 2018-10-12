@@ -24,7 +24,7 @@ public class DeployMojo extends AbstractMojo
     MavenProject project;
 
     /**
-     * Type of deployment local or cloud
+     * Type of deployment local or mesh
     */
     @Parameter(property = "deploymentType", defaultValue = Constants.LocalDeploymentType)
     String deploymentType;
@@ -32,20 +32,14 @@ public class DeployMojo extends AbstractMojo
     /**
      * Comma seperated resource files or the directory in which the resource files are present
     */
-    @Parameter(property = "filePathsOrDirectory", defaultValue = Constants.ServiceFabricResourcesPath)
-    String filePathsOrDirectory;
+    @Parameter(property = "inputYamlFilesPath", defaultValue = Constants.ServiceFabricResourcesPath)
+    String inputYamlFilesPath;
 
     /**
-     * IP address or domain name of the cluster in which this application should be deployed. Only valid in local deployment type.
+     * IPAddress:Port of the cluster in which this application should be deployed. Only valid in local deployment type.
     */
-    @Parameter(property = "ipAddress", defaultValue = Constants.DefaultIPAddress)
-    String ipAddress;
-
-    /**
-     * HTTP Gateway port of the cluster. Only valid in local deployment type
-    */
-    @Parameter(property = "port", defaultValue = Constants.DefaultPort)
-    String port;
+    @Parameter(property = "clusterEndpoint", defaultValue = Constants.DefaultIPAddress)
+    String clusterEndpoint;
 
     /**
      * Resource Group name for mesh deployment. Only valid in cloud deployment type
@@ -67,18 +61,18 @@ public class DeployMojo extends AbstractMojo
         if(!Utils.checkIfExists(serviceFabricResourcesDirectory)){
             throw new MojoFailureException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
         }
-        if(filePathsOrDirectory.equals(Constants.ServiceFabricResourcesPath)){
-            filePathsOrDirectory = Utils.getServicefabricResourceDirectory(logger, project);
+        if(inputYamlFilesPath.equals(Constants.ServiceFabricResourcesPath)){
+            inputYamlFilesPath = Utils.getServicefabricResourceDirectory(logger, project);
         }
-        Utils.generatejsonfrommergetool(logger, deploymentType, project, filePathsOrDirectory);
+        Utils.generatejsonfrommergetool(logger, deploymentType, project, inputYamlFilesPath);
         if(deploymentType.equalsIgnoreCase(Constants.LocalDeploymentType)){
             /*Utils.checksfctlinstallation(logger);
             Utils.connecttolocalcluster(logger, ipAddress, port);
-            Utils.executeCommand(logger, "sfctl mesh deployment create --file-paths-or-directory " + filePathsOrDirectory);*/
+            Utils.executeCommand(logger, "sfctl mesh deployment create --input-yaml-files-path " + inputYamlFilesPath);*/
             listAndDeployResourcesLocal();
             TelemetryHelper.sendEvent(TelemetryEventType.DeployMojo, String.format("Deployed application locally"), logger);
         }
-        else if(deploymentType.equalsIgnoreCase(Constants.CloudDeploymentType)){
+        else if(deploymentType.equalsIgnoreCase(Constants.MeshDeploymentType)){
             //To be implemented
             Utils.checkazinstallation(logger);
 
@@ -118,10 +112,10 @@ public class DeployMojo extends AbstractMojo
                 String urlString = null;
                 String resourceName = Utils.getResourceName(file.getName());
                 if(Utils.getResourceType(file.getName()).equals(Utils.ResourceType.application)){
-                    urlString = String.format("http://%s:%s/Resources/Applications/%s?api-version=6.3-preview", ipAddress, port, resourceName);
+                    urlString = String.format("http://%s/Resources/Applications/%s?api-version=6.3-preview", clusterEndpoint, resourceName);
                 }
                 else if(Utils.getResourceType(file.getName()).equals(Utils.ResourceType.volume)){
-                    urlString = String.format("http://%s:%s/Resources/Volumes/%s?api-version=6.3-preview", ipAddress, port, resourceName);
+                    urlString = String.format("http://%s/Resources/Volumes/%s?api-version=6.3-preview", clusterEndpoint, resourceName);
                 }
                 else if(Utils.getResourceType(file.getName()).equals(Utils.ResourceType.network)){
                     // Ignore this as network resource deployment locally is not supported

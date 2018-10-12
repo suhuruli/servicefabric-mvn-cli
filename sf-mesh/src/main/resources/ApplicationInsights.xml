@@ -2,6 +2,7 @@
     <ApplicationInsights xmlns="http://schemas.microsoft.com/ApplicationInsights/2013/Settings" schemaVersion="2014-05-30">
       <!-- Need to change the instrumentation key-->
       <InstrumentationKey>fb0c012e-2bd1-4341-b4bc-bc55514c0003</InstrumentationKey>
+      <DisableTelemetry>true</DisableTelemetry>
       <PerformanceCounters>
        <UseBuiltIn>False</UseBuiltIn>
       </PerformanceCounters>

@@ -22,46 +22,34 @@ public class AddNetworkMojo extends AbstractMojo
     MavenProject project;
     
     /**
-     * Name of the network
+     * schema version of the network yaml to be generated
     */
-    @Parameter(property = "networkRef", required = true)
-    String networkRef;
-    
+    @Parameter(property = "schemaVersion", defaultValue = Constants.DefaultSchemaVersion)
+    String schemaVersion;
+
     /**
      * Name of the network
+    */
+    @Parameter(property = "networkName", required = true)
+    String networkName;
+    
+    /**
+     * Description of the network
     */
     @Parameter(property = "networkDescription", defaultValue= Constants.DefaultNetworkDescription)
     String networkDescription;
 
     /**
+     * Kind of the network
+     */
+    @Parameter(property = "networkKind", defaultValue= Constants.DefaultNetworkKind)
+    String networkKind;
+
+    /**
      * Address prefix of the subnet
      */
-    @Parameter(property = "addressPrefix", defaultValue= Constants.DefaultAddressPrefix)
-    String addressPrefix;
-    
-    /**
-     * Public IP port of Ingress
-     */
-    @Parameter(property = "ingressPort", defaultValue= Constants.DefaultPortNumber)
-    String ingressPort;
-
-    /**
-     * Name of the application which uses this network
-     */
-    @Parameter(property = "applicationName", required= true)
-    String applicationName;
-
-    /**
-     * List of comma seperated services  w.r.t the application which uses this network
-     */
-    @Parameter(property = "serviceName", required= true)
-    String serviceName;
-
-    /**
-     * List of comma seperated endpoints of the services which is being exposed. This should be of the same order as the serviceNameList
-     */
-    @Parameter(property = "listenerName", required= true)
-    String listenerName;
+    @Parameter(property = "networkAddressPrefix", required = true)
+    String networkAddressPrefix;
 
     public Log logger  = getLog();
 	
@@ -73,46 +61,19 @@ public class AddNetworkMojo extends AbstractMojo
         	throw new MojoFailureException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
         }
         else{
-            if(Utils.checkIfExists(Utils.getPath(appResourcesDirectory, "network_" + networkRef + ".yaml"))){
+            if(Utils.checkIfExists(Utils.getPath(appResourcesDirectory, "network_" + networkName + ".yaml"))){
                 throw new MojoFailureException("Network Resource with the specified name already exists");
             }
             InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.NetworkResourceName);
             try {
                 String networkContent = IOUtil.toString(resource, "UTF-8");
-                networkContent = Utils.replaceString(logger, networkContent, "NETWORK_NAME", networkRef, Constants.NetworkResourceName);
+                networkContent = Utils.replaceString(logger, networkContent, "NETWORK_NAME", networkName, Constants.NetworkResourceName);
                 networkContent = Utils.replaceString(logger, networkContent, "NETWORK_DESCRIPTION", networkDescription, Constants.NetworkResourceName);
-                networkContent = Utils.replaceString(logger, networkContent, "ADDRESS_PREFIX", addressPrefix, Constants.NetworkResourceName);
-                if(ingressPort.equals(Constants.DefaultPortNumber)){
-                    Random rand = new Random();
-                    int port = rand.nextInt(65535 - 49152 + 1) + 49152; 
-                    ingressPort = Integer.toString(port); 
-                }
-                String[] serviceNameList= serviceName.split(",");
-                String[] listenerNameList= listenerName.split(",");
-                if(serviceNameList.length != listenerNameList.length){
-                    throw new MojoFailureException("The serviceNames and listenerNames length are not matching");
-                }
-                String ingressContentPrefix="    ingressConfig:\n" +
-                "      layer4:\n";
-                networkContent += ingressContentPrefix;
-                for(int i=0; i<serviceNameList.length; i++){
-                    String serviceName = serviceNameList[i];
-                    String listenerName = listenerNameList[i];
-                    String ingressContent = "        - name: INGRESS_NAME\n" +
-                        "          publicPort: INGRESS_PORT_NO\n" +
-                        "          applicationName: APPLICATION_NAME\n" +
-                        "          serviceName: SERVICE_NAME\n" +
-                        "          endpointName: ENDPOINT_NAME\n";
-                    networkContent += ingressContent;
-                    networkContent = Utils.replaceString(logger, networkContent, "INGRESS_PORT_NO", ingressPort, Constants.NetworkResourceName);
-                    networkContent = Utils.replaceString(logger, networkContent, "APPLICATION_NAME", applicationName, Constants.NetworkResourceName);
-                    networkContent = Utils.replaceString(logger, networkContent, "SERVICE_NAME", serviceName, Constants.NetworkResourceName);
-                    networkContent = Utils.replaceString(logger, networkContent, "ENDPOINT_NAME", listenerName, Constants.NetworkResourceName);
-                    networkContent = Utils.replaceString(logger, networkContent, "INGRESS_NAME", listenerName, Constants.NetworkResourceName);
-                }
-                FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "network_" + networkRef + ".yaml"), networkContent);
+                networkContent = Utils.replaceString(logger, networkContent, "ADDRESS_PREFIX", networkAddressPrefix, Constants.NetworkResourceName);
+                networkContent = Utils.replaceString(logger, networkContent, "NETWORK_KIND", networkName, Constants.NetworkResourceName);
+                FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "network_" + networkName + ".yaml"), networkContent);
 				logger.debug("Wrote content to output");
-                TelemetryHelper.sendEvent(TelemetryEventType.AddNetworkMojo, String.format("Added network with name: %s", serviceName), logger);
+                TelemetryHelper.sendEvent(TelemetryEventType.AddNetworkMojo, String.format("Added network with name: %s", networkName), logger);
             }
             catch (IOException e) {
 				logger.error(e);
