@@ -1,14 +1,22 @@
 package com.microsoft.servicefabric;
 
 public enum TelemetryEventType {
-    InitMojo(0), AddServiceMojo(1), AddVolumeMojo(2), DeployMojo(3), RemoveMojo(4), AddNetworkMojo(5);
-    private final int value;
+    INIT("Java.MavenCLI.Init"),
+    ADDSERVICE("Java.MavenCLI.AddService"),
+    ADDVOLUME("Java.MavenCLI.AddVolume"),
+    DEPLOYLOCAL("Java.MavenCLI.DeployLocal"),
+    DEPLOYMESH("Java.MavenCLI.DeployMesh"),
+    REMOVE("Java.MavenCLI.Remove"),
+    ADDNETWORK("Java.MavenCLI.AddNetwork"),
+    ADDGATEWAY("Java.MavenCLI.AddGateway");
 
-    private TelemetryEventType(int value) {
+    private final String value;
+
+    private TelemetryEventType(String value) {
         this.value = value;
     }
 
-    public int getValue() {
+    public String getValue() {
         return this.value;
     }
 }

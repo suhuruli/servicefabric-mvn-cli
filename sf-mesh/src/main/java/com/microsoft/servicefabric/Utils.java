@@ -1,12 +1,17 @@
 package com.microsoft.servicefabric;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.rmi.CORBA.Util;
@@ -20,7 +25,11 @@ import org.codehaus.plexus.util.IOUtil;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 public class Utils
 {
     enum ResourceType{
@@ -224,7 +233,7 @@ public class Utils
         String folderName = null;
         String inputFiles = listFilesAndFilesSubDirectories(logger, getServicefabricResourceDirectory(logger, project));
         logger.debug("inputFiles:" + inputFiles);
-        if(deploymentType.equalsIgnoreCase(Constants.CloudDeploymentType)){
+        if(deploymentType.equalsIgnoreCase(Constants.MeshDeploymentType)){
             outputFormat = "SF_SBZ_RP_JSON";
             folderName = "cloud";
         }
@@ -264,5 +273,27 @@ public class Utils
             logger.error(e);
             throw new MojoFailureException(String.format("%s ParseException", file.getName()));
 		}
+    }
+
+    @SuppressWarnings("unchecked")
+    public static LinkedHashMap<String, Object> stringToYaml(Log logger, String content) throws MojoFailureException {
+        ObjectMapper oMapper = new ObjectMapper(new YAMLFactory());
+        InputStream stream = new ByteArrayInputStream(content.getBytes(Charset.forName("UTF-8")));
+        try {
+            return oMapper.readValue(stream, LinkedHashMap.class);
+        } catch (IOException e) {
+            logger.error(e);
+            throw new MojoFailureException(String.format("string to yaml conversion failed"));
+        }
+    }
+
+    public static String yamlToString(LinkedHashMap<String, Object> yaml){
+        StringWriter content = new StringWriter();
+        DumperOptions options = new DumperOptions();
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        options.setPrettyFlow(true);
+        Yaml dumper = new Yaml (options);
+        dumper.dump(yaml, content);
+        return content.toString();
     }
 }

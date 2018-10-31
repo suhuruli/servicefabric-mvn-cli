@@ -2,6 +2,8 @@ package com.microsoft.servicefabric;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Random;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -22,6 +24,12 @@ public class AddServiceMojo extends AbstractMojo
 {
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
+
+    /**
+     * schema version of the network yaml to be generated
+    */
+    @Parameter(property = "schemaVersion", defaultValue = Constants.DefaultSchemaVersion)
+    String schemaVersion;
 
     /**
      * Name of the application
@@ -92,8 +100,14 @@ public class AddServiceMojo extends AbstractMojo
     /**
      * Network resource reference in which the container should be deployed
     */
-    @Parameter(property = "networkRef", defaultValue = Constants.DefaultNetworkRefName)
+    @Parameter(property = "networkRef", defaultValue = Constants.DefaultNetworkRefName, alias= "networkName")
     String networkRef; 
+
+    /**
+     * Enviromental variables suppiled in key1:val1,key2:val2 format
+     */
+    @Parameter(property = "enviromentalVariables", defaultValue = Constants.DefaultEnvironmentalVariables)
+    String enviromentalVariables;
 
     private Log logger  = getLog();
 
@@ -122,6 +136,14 @@ public class AddServiceMojo extends AbstractMojo
                 serviceContent = Utils.replaceString(logger, serviceContent, "APP_NAME", applicationName, Constants.ServiceResourceName);
                 serviceContent = Utils.replaceString(logger, serviceContent, "SERVICE_NAME", serviceName, Constants.ServiceResourceName);
                 serviceContent = Utils.replaceString(logger, serviceContent, "SERVICE_DESCRIPTION", serviceDescription, Constants.ServiceResourceName);
+                if(osType.equals(Constants.DefaultOS)){
+                    if(Utils.isLinux()){
+                        osType = Constants.LinuxOS;
+                    }
+                    else{
+                        osType = Constants.WindowsOS;
+                    }
+                }
                 serviceContent = Utils.replaceString(logger, serviceContent, "OS_TYPE", osType, Constants.ServiceResourceName);
                 if(codePackageName.equals(Constants.DefaultCodePackageName)){
                     codePackageName = serviceName + "CodePackage";
@@ -142,20 +164,73 @@ public class AddServiceMojo extends AbstractMojo
                 serviceContent = Utils.replaceString(logger, serviceContent, "MEMORY_USAGE", memoryUsage, Constants.ServiceResourceName);
                 serviceContent = Utils.replaceString(logger, serviceContent, "REPLICA_COUNT", replicaCount, Constants.ServiceResourceName);
                 if(!networkRef.equals(Constants.DefaultNetworkRefName)){
-                    String serviceContentString="          networkRefs:\n" + 
-                    "            - name: NETWORK_NAME";
-                    serviceContent += serviceContentString;
-                    serviceContent = Utils.replaceString(logger, serviceContent, "NETWORK_NAME", networkRef, Constants.ServiceResourceName);
+                    serviceContent = AddNetworkRefs(logger, serviceContent, networkRef);
+                }
+                if(!enviromentalVariables.equals(Constants.DefaultEnvironmentalVariables)){
+                    serviceContent = AddEnvironmentVariables(logger, serviceContent, enviromentalVariables);
                 }
                 Utils.createDirectory(logger, serviceDirectory);
                 FileUtils.fileWrite(Utils.getPath(serviceDirectory, "service_" + serviceName + ".yaml"), serviceContent);
                 logger.debug("Wrote content to output");
-                TelemetryHelper.sendEvent(TelemetryEventType.AddServiceMojo, String.format("Added service with name: %s", serviceName), logger);
+                TelemetryHelper.sendEvent(TelemetryEventType.ADDSERVICE, String.format("Added service with name: %s", serviceName), logger);
             } catch (IOException e) {
                 logger.error(e);
                 throw new MojoFailureException("Error while writing output");
             }
     
         }
+    }
+    @SuppressWarnings("unchecked")
+    public String AddNetworkRefs(Log logger, String content, String networkName) throws MojoFailureException{
+       
+       LinkedHashMap<String, Object> networkRef = new LinkedHashMap<String, Object>();
+       networkRef.put("name", networkName);
+       ArrayList<LinkedHashMap<String, Object>> networkRefs = new ArrayList<LinkedHashMap<String, Object>>();
+       networkRefs.add(networkRef);
+       LinkedHashMap<String, Object> map = Utils.stringToYaml(logger, content);
+       LinkedHashMap<String, Object> application = (LinkedHashMap<String, Object>)map.get("application");
+       LinkedHashMap<String, Object> applicationProperties = (LinkedHashMap<String, Object>)application.get("properties");
+       ArrayList<LinkedHashMap<String, Object>> services = (ArrayList<LinkedHashMap<String, Object>>)applicationProperties.get("services");
+       LinkedHashMap<String, Object> service = services.get(0);
+       LinkedHashMap<String, Object> serviceProperties = (LinkedHashMap<String, Object>)service.get("properties");
+       serviceProperties.put("networkRefs", networkRefs);
+       service.replace("properties", serviceProperties);
+       services.remove(0);
+       services.add(0, service);
+       applicationProperties.replace("properties", services);
+       application.replace("application", applicationProperties);
+       map.replace("application", application);
+       return Utils.yamlToString(map);
+    }
+
+    @SuppressWarnings("unchecked")
+    public String AddEnvironmentVariables(Log logger, String content, String environmentVariables) throws MojoFailureException{
+        String[] env = environmentVariables.split(",");
+        ArrayList<LinkedHashMap<String, Object>> envList = new ArrayList<LinkedHashMap<String, Object>>();
+        for(int i=0; i<env.length; i++){
+            String[] kvp = env[i].split(":");
+            LinkedHashMap<String, Object> envMap = new LinkedHashMap<String, Object>();
+            envMap.put(kvp[0], kvp[1]);
+            envList.add(envMap);
+        }
+        LinkedHashMap<String, Object> map = Utils.stringToYaml(logger, content);
+        LinkedHashMap<String, Object> application = (LinkedHashMap<String, Object>)map.get("application");
+        LinkedHashMap<String, Object> applicationProperties = (LinkedHashMap<String, Object>)application.get("properties");
+        ArrayList<LinkedHashMap<String, Object>> services = (ArrayList<LinkedHashMap<String, Object>>)applicationProperties.get("services");
+        LinkedHashMap<String, Object> service = services.get(0);
+        LinkedHashMap<String, Object> serviceProperties = (LinkedHashMap<String, Object>)service.get("properties");
+        ArrayList<LinkedHashMap<String, Object>> codePackages = (ArrayList<LinkedHashMap<String, Object>>)serviceProperties.get("codePackages");
+        LinkedHashMap<String, Object> codePackage = codePackages.get(0);
+        codePackage.put("environmentVariables", envList);
+        codePackages.remove(0);
+        codePackages.add(codePackage);
+        serviceProperties.replace("codePackages", codePackages);
+        service.replace("properties", serviceProperties);
+        services.remove(0);
+        services.add(0, service);
+        applicationProperties.replace("properties", services);
+        application.replace("application", applicationProperties);
+        map.replace("application", application);
+        return Utils.yamlToString(map);
     }
 }

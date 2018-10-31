@@ -72,16 +72,16 @@ public class RemoveMojo extends AbstractMojo
             Utils.connecttolocalcluster(logger, ipAddress, port);
             Utils.executeCommand(logger, "sfctl mesh app delete --application-resource-name " + applicationName);*/
             removeApplicationLocal();
-            TelemetryHelper.sendEvent(TelemetryEventType.RemoveMojo, String.format("Removed application %s locally", applicationName), logger);
+            TelemetryHelper.sendEvent(TelemetryEventType.REMOVE, String.format("Removed application %s locally", applicationName), logger);
         }
-        else if(deploymentType.equalsIgnoreCase(Constants.CloudDeploymentType)){
+        else if(deploymentType.equalsIgnoreCase(Constants.MeshDeploymentType)){
             //To be implemented
             if(resourceGroup.equalsIgnoreCase(Constants.DefaultResourceGroup)){
                 throw new MojoFailureException("Resource Group is not mentioned. Please mention the resource group in which your application is deployed");    
             }
             logger.info("Deleting Application");
             Utils.executeCommand(logger, String.format("az mesh app delete --name %s --resource-group %s --yes", applicationName, resourceGroup));
-            TelemetryHelper.sendEvent(TelemetryEventType.RemoveMojo, String.format("Removed application %s from mesh", applicationName), logger);
+            TelemetryHelper.sendEvent(TelemetryEventType.REMOVE, String.format("Removed application %s from mesh", applicationName), logger);
             if(deleteResourceGroup.equalsIgnoreCase("true")){
                 logger.info("Deleting Resource group");
                 Utils.executeCommand(logger, String.format("az group delete --name %s --yes", resourceGroup));

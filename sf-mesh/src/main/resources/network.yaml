@@ -3,4 +3,5 @@ network:
   name: NETWORK_NAME
   properties:
     description: NETWORK_DESCRIPTION
-    addressPrefix: ADDRESS_PREFIX
+    kind: NETWORK_KIND
+    networkAddressPrefix: ADDRESS_PREFIX
