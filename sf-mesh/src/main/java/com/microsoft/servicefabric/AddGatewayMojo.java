@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -72,13 +71,13 @@ public class AddGatewayMojo extends AbstractMojo {
     /**
      * Name of the listener
     */
-    @Parameter(property = "listenerName", defaultValue = Constants.DefaultListenerName, required = true)
+    @Parameter(property = "listenerName", required = true)
     String listenerName;
     
     /**
      * Port to be on the listener of the service
      */
-    @Parameter(property = "tcpport", required = true)
+    @Parameter(property = "tcpPort", required = true)
     String tcpPort;
 
     public Log logger  = getLog();
@@ -114,7 +113,7 @@ public class AddGatewayMojo extends AbstractMojo {
                 gatewayContent = Utils.replaceString(logger, gatewayContent, "LISTENER_NAME", listenerName, Constants.GatewayResourceName);
                 FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "gateway_" + gatewayName + ".yaml"), gatewayContent);
 				logger.debug("Wrote content to output");
-                TelemetryHelper.sendEvent(TelemetryEventType.AddGatewayMojo, String.format("Added gateway with name: %s", gatewayName), logger);
+                TelemetryHelper.sendEvent(TelemetryEventType.ADDGATEWAY, String.format("Added gateway with name: %s", gatewayName), logger);
             }
             catch (IOException e) {
 				logger.error(e);

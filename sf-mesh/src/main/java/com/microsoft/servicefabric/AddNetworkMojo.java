@@ -2,7 +2,6 @@ package com.microsoft.servicefabric;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Random;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -73,7 +72,7 @@ public class AddNetworkMojo extends AbstractMojo
                 networkContent = Utils.replaceString(logger, networkContent, "NETWORK_KIND", networkName, Constants.NetworkResourceName);
                 FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "network_" + networkName + ".yaml"), networkContent);
 				logger.debug("Wrote content to output");
-                TelemetryHelper.sendEvent(TelemetryEventType.AddNetworkMojo, String.format("Added network with name: %s", networkName), logger);
+                TelemetryHelper.sendEvent(TelemetryEventType.ADDNETWORK, String.format("Added network with name: %s", networkName), logger);
             }
             catch (IOException e) {
 				logger.error(e);

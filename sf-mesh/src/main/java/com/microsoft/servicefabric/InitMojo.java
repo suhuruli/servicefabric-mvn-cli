@@ -63,7 +63,7 @@ public class InitMojo extends AbstractMojo
             }
             logger.debug("Wrote content to output");
             logger.debug("Adding Service");
-            TelemetryHelper.sendEvent(TelemetryEventType.InitMojo, String.format("Added application with name: %s", applicationName), logger);
+            TelemetryHelper.sendEvent(TelemetryEventType.INIT, String.format("Added application with name: %s", applicationName), logger);
 		} catch (IOException e) {
             logger.error(e);
             throw new MojoFailureException("Error while writing output");

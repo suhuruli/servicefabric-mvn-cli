@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Properties;
 import java.util.Random;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -16,8 +15,6 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /**
  * Goal which adds a service resource to a project.
@@ -175,7 +172,7 @@ public class AddServiceMojo extends AbstractMojo
                 Utils.createDirectory(logger, serviceDirectory);
                 FileUtils.fileWrite(Utils.getPath(serviceDirectory, "service_" + serviceName + ".yaml"), serviceContent);
                 logger.debug("Wrote content to output");
-                TelemetryHelper.sendEvent(TelemetryEventType.AddServiceMojo, String.format("Added service with name: %s", serviceName), logger);
+                TelemetryHelper.sendEvent(TelemetryEventType.ADDSERVICE, String.format("Added service with name: %s", serviceName), logger);
             } catch (IOException e) {
                 logger.error(e);
                 throw new MojoFailureException("Error while writing output");

@@ -7,13 +7,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TelemetryHelper {
-	// private static final TelemetryClient client= new TelemetryClient();
+	private static final TelemetryClient client= new TelemetryClient();
 
 	public static boolean sendEvent(TelemetryEventType type, String value, Log logger){
 		Map<String, String> properties = new HashMap<String, String>();
-		properties.put(type.toString(), value);
-        // client.trackEvent("MVNCLI" + type.toString(), properties, null);
-        // client.flush();
+		properties.put("Description", value);
+		try {
+			client.trackEvent(type.getValue(), properties, null);
+			client.flush();
+			Thread.sleep(1500);
+		} catch (InterruptedException e) {
+			logger.error("Failed sending telemetry event");
+		}
 		return true;
 	}
 }

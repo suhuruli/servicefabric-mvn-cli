@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
     <ApplicationInsights xmlns="http://schemas.microsoft.com/ApplicationInsights/2013/Settings" schemaVersion="2014-05-30">
-      <!-- Need to change the instrumentation key-->
-      <InstrumentationKey>fb0c012e-2bd1-4341-b4bc-bc55514c0003</InstrumentationKey>
-      <DisableTelemetry>true</DisableTelemetry>
+      <InstrumentationKey>58ef8eab-a250-4b11-aea8-36435e5be1a7</InstrumentationKey>
       <PerformanceCounters>
        <UseBuiltIn>False</UseBuiltIn>
       </PerformanceCounters>
-      <!--<Channel>
+      <Channel>
         <EndpointAddress>https://vortex.data.microsoft.com/collect/v1</EndpointAddress>
-      </Channel>-->
+      </Channel>
     </ApplicationInsights>
