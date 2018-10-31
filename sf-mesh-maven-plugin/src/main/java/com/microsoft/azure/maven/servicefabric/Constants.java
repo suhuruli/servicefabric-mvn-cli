@@ -1,4 +1,4 @@
-package com.microsoft.servicefabric;
+package com.microsoft.azure.maven.servicefabric;
 
 public class Constants
 {

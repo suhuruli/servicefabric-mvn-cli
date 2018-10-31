@@ -1,4 +1,4 @@
-package com.microsoft.servicefabric;
+package com.microsoft.azure.maven.servicefabric;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
