@@ -1,4 +1,4 @@
-package com.microsoft.servicefabric;
+package com.microsoft.azure.maven.servicefabric;
 
 public enum TelemetryEventType {
     INIT("Java.MavenCLI.Init"),
