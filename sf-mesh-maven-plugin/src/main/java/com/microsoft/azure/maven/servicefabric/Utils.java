@@ -12,14 +12,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.Map;
-
-import javax.rmi.CORBA.Util;
 
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.json.simple.JSONObject;
@@ -160,8 +156,12 @@ public class Utils
         }
     }
 
-    public static void connecttolocalcluster(Log logger, String ipString, String port) throws MojoFailureException{
-        Utils.executeCommand(logger, "sfctl cluster select --endpoint " + "http://" + ipString + ":" + port);
+    public static void connecttounsecurecluster(Log logger, String endpoint) throws MojoFailureException{
+        Utils.executeCommand(logger, "sfctl cluster select --endpoint " + endpoint);
+    }
+
+    public static void connecttosecurecluster(Log logger, String endpoint, String pempath) throws MojoFailureException{
+        Utils.executeCommand(logger, "sfctl cluster select --endpoint " + endpoint + "--pem " + pempath);
     }
 
     public static void checkdotnetinstallation(Log logger) throws MojoFailureException{
@@ -233,7 +233,7 @@ public class Utils
         String folderName = null;
         String inputFiles = listFilesAndFilesSubDirectories(logger, getServicefabricResourceDirectory(logger, project));
         logger.debug("inputFiles:" + inputFiles);
-        if(deploymentType.equalsIgnoreCase(Constants.MeshDeploymentType)){
+        if(deploymentType.equalsIgnoreCase(Constants.MESH_DEPLOYMENT_TYPE)){
             outputFormat = "SF_SBZ_RP_JSON";
             folderName = "cloud";
         }

@@ -1,11 +1,8 @@
 package com.microsoft.azure.maven.servicefabric;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
@@ -14,29 +11,31 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugin.logging.Log;
+
 /**
- * Goal which deploys the mesh application to local cluster, SFRP or mesh
+ * Goal which removes the mesh application from local cluster, SFRP or mesh
  */
-@Mojo( name = "deploy", defaultPhase = LifecyclePhase.NONE )
-public class DeployMojo extends AbstractMojo
+@Mojo( name = "removeapp", defaultPhase = LifecyclePhase.NONE )
+public class RemoveAppMojo extends AbstractMojo
 {
+
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
 
     /**
-     * Type of deployment local or mesh or sfrp
+     * Type of deployment local or cloud or sfrp
     */
     @Parameter(property = "deploymentType", defaultValue = Constants.LOCAL_DEPLOYMENT_TYPE)
     String deploymentType;
 
     /**
-     * Comma seperated resource files or the directory in which the resource files are present
+     * Name of the application
     */
-    @Parameter(property = "inputYamlFilePaths", defaultValue = Constants.SERVICE_FABRIC_RESOURCES_PATH)
-    String inputYamlFilePaths;
+    @Parameter(property = "applicationName", required = true)
+    String applicationName;
 
     /**
-     * URL of the cluster in which this application should be deployed. Only valid in local/sfrp deployment type.
+     * URL of the cluster from which the app needs to be removed. Only valid in local/sfrp deployment type.
     */
     @Parameter(property = "clusterEndpoint", defaultValue = Constants.DEFAULT_CLUSTER_ENDPOINT)
     String clusterEndpoint;
@@ -48,10 +47,10 @@ public class DeployMojo extends AbstractMojo
     String resourceGroup;
 
     /**
-     * Location of the resource group. Only valid in mesh deployment type
+     * Delete Resource group along with application resource deletion. Only valid in mesh deployment type
     */
-    @Parameter(property = "location", defaultValue = Constants.DEFAULT_LOCATION)
-    String location;
+    @Parameter(property = "deleteResourceGroup", defaultValue = Constants.DEFAULT_DELETE_RESOURCE_GROUP)
+    String deleteResourceGroup;
 
     /**
      * Location of pem file. Only valid in sfrp deployment type
@@ -67,14 +66,11 @@ public class DeployMojo extends AbstractMojo
         if(!Utils.checkIfExists(serviceFabricResourcesDirectory)){
             throw new MojoFailureException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
         }
-        if(inputYamlFilePaths.equals(Constants.SERVICE_FABRIC_RESOURCES_PATH)){
-            inputYamlFilePaths = Utils.getServicefabricResourceDirectory(logger, project);
-        }
         if(deploymentType.equalsIgnoreCase(Constants.LOCAL_DEPLOYMENT_TYPE)){
             Utils.checksfctlinstallation(logger);
             Utils.connecttounsecurecluster(logger, clusterEndpoint);
-            Utils.executeCommand(logger, "sfctl mesh deployment create --input-yaml-file-paths " + inputYamlFilePaths);
-            TelemetryHelper.sendEvent(TelemetryEventType.DEPLOYLOCAL, String.format("Deployed application locally"), logger);
+            Utils.executeCommand(logger, "sfctl mesh app delete --application-resource-name " + applicationName);
+            TelemetryHelper.sendEvent(TelemetryEventType.REMOVEAPP, String.format("Removed application %s locally", applicationName), logger);
         }
         else if(deploymentType.equalsIgnoreCase(Constants.SFRP_DEPLOYMENT_TYPE)){
             if(pemFilePath.equalsIgnoreCase(Constants.DEFAULT_PEM_FILE_PATH)){
@@ -82,23 +78,21 @@ public class DeployMojo extends AbstractMojo
             }
             Utils.checksfctlinstallation(logger);
             Utils.connecttosecurecluster(logger, clusterEndpoint, pemFilePath);
-            Utils.executeCommand(logger, "sfctl mesh deployment create --input-yaml-file-paths " + inputYamlFilePaths);
-            TelemetryHelper.sendEvent(TelemetryEventType.DEPLOYSFRP, String.format("Deployed application to SFRP"), logger);
+            Utils.executeCommand(logger, "sfctl mesh app delete --application-resource-name " + applicationName);
+            TelemetryHelper.sendEvent(TelemetryEventType.REMOVEAPP, String.format("Removed application from SFRP"), logger);
         }
         else if(deploymentType.equalsIgnoreCase(Constants.MESH_DEPLOYMENT_TYPE)){
-            Utils.checkazinstallation(logger);
 
-            if(resourceGroup.equals(Constants.DEFAULT_RESOURCE_GROUP)){
-                throw new MojoFailureException("Resource group is not provided. Please provide a resource group name");
+            if(resourceGroup.equalsIgnoreCase(Constants.DEFAULT_RESOURCE_GROUP)){
+                throw new MojoFailureException("Resource Group is not mentioned. Please mention the resource group in which your application is deployed");    
             }
-
-            // Create resource group
-            logger.info("Creating Resource Group");
-            Utils.executeCommand(logger, String.format("az group create --name %s --location %s", resourceGroup, location));
-            // Perform deployment
-            logger.info("Performing deployment");
-            Utils.executeCommand(logger, String.format("az mesh deployment create --resource-group %s --input-yaml-file-paths %s  --parameters \"{'location': {'value': '%s'}}\"", resourceGroup, inputYamlFilePaths, location));
-            TelemetryHelper.sendEvent(TelemetryEventType.DEPLOYMESH, String.format("Deployed application on mesh"), logger);
+            logger.info("Deleting Application");
+            Utils.executeCommand(logger, String.format("az mesh app delete --name %s --resource-group %s --yes", applicationName, resourceGroup));
+            TelemetryHelper.sendEvent(TelemetryEventType.REMOVEAPP, String.format("Removed application %s from mesh", applicationName), logger);
+            if(deleteResourceGroup.equalsIgnoreCase("true")){
+                logger.info("Deleting Resource group");
+                Utils.executeCommand(logger, String.format("az group delete --name %s --yes", resourceGroup));
+            }
         }
         else{
             throw new MojoFailureException(String.format("%s deployment type is not valid", deploymentType));

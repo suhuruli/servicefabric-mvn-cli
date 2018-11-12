@@ -18,3 +18,7 @@ application:
                   cpu: CPU_USAGE
                   memoryInGB: MEMORY_USAGE
           replicaCount: REPLICA_COUNT
+          networkRefs:
+          - name: NETWORK_NAME
+            endpointRefs:
+            - name: LISTENER_NAME

@@ -23,7 +23,7 @@ public class AddVolumeMojo extends AbstractMojo
     /**
      * schema version of the network yaml to be generated
     */
-    @Parameter(property = "schemaVersion", defaultValue = Constants.DefaultSchemaVersion)
+    @Parameter(property = "schemaVersion", defaultValue = Constants.DEFAULT_SCHEMA_VERSION)
 	String schemaVersion;
 
 	@Parameter(defaultValue = "${project}", required = true, readonly = true)
@@ -38,13 +38,13 @@ public class AddVolumeMojo extends AbstractMojo
 	/**
      * Name of the volume
     */
-    @Parameter(property = "volumeDescription", defaultValue = Constants.DefaultVolumeDescription)
+    @Parameter(property = "volumeDescription", defaultValue = Constants.DEFAULT_VOLUME_DESCRIPTION)
 	String volumeDescription;
 
 	/**
      * Name of the volme provider
     */
-    @Parameter(property = "volumeProvider", defaultValue = Constants.DefaultVolumeProvider)
+    @Parameter(property = "volumeProvider", defaultValue = Constants.DEFAULT_VOLUME_PROVIDER)
 	String volumeProvider;
 
 	/**
@@ -78,16 +78,16 @@ public class AddVolumeMojo extends AbstractMojo
             if(Utils.checkIfExists(Utils.getPath(appResourcesDirectory, "volume_" + volumeName + ".yaml"))){
                 throw new MojoFailureException("Volume Resource with the specified name already exists");
 			}
-			InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.VolumeResourceName);
+			InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.VOLUME_RESOURCE_NAME);
 			try {
 				String volumeContent = IOUtil.toString(resource, "UTF-8");
-				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_NAME", volumeName, Constants.VolumeResourceName);
-				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_DESCRIPTION", volumeDescription, Constants.VolumeResourceName);
-				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_PROVIDER", volumeProvider, Constants.VolumeResourceName);
-				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_NAME", volumeAccountName, Constants.VolumeResourceName);
-				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_KEY", volumeAccountKey, Constants.VolumeResourceName);
+				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_NAME", volumeName, Constants.VOLUME_RESOURCE_NAME);
+				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_DESCRIPTION", volumeDescription, Constants.VOLUME_RESOURCE_NAME);
+				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_PROVIDER", volumeProvider, Constants.VOLUME_RESOURCE_NAME);
+				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_NAME", volumeAccountName, Constants.VOLUME_RESOURCE_NAME);
+				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_KEY", volumeAccountKey, Constants.VOLUME_RESOURCE_NAME);
 				FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "volume_" + volumeName + ".yaml"), volumeContent);
-				logger.debug("Wrote content to output");
+				logger.debug(String.format("Wrote %s volume content to output", volumeName));
 				TelemetryHelper.sendEvent(TelemetryEventType.ADDVOLUME, String.format("Added volume with name: %s", volumeName), logger);
 			} catch (IOException e) {
 				logger.error(e);
