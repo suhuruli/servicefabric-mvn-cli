@@ -102,6 +102,7 @@ public class AddGatewayMojo extends AbstractMojo {
 
             try{
                 String gatewayContent = IOUtil.toString(resource, "UTF-8");
+                gatewayContent = Utils.replaceString(logger, gatewayContent, "SCHEMA_VERSION", schemaVersion, Constants.GATEWAY_RESOURCE_NAME);
                 gatewayContent = Utils.replaceString(logger, gatewayContent, "GATEWAY_NAME", gatewayName, Constants.GATEWAY_RESOURCE_NAME);
                 gatewayContent = Utils.replaceString(logger, gatewayContent, "GATEWAY_DESCRIPTION", gatewayDescription, Constants.GATEWAY_RESOURCE_NAME);
                 gatewayContent = Utils.replaceString(logger, gatewayContent, "SOURCE_NETWORK", sourceNetwork, Constants.GATEWAY_RESOURCE_NAME);

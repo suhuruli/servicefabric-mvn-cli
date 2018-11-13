@@ -1,5 +1,6 @@
+## Gateway Definition ##
 gateway:
-  schemaVersion: 1.0.0-preview2
+  schemaVersion: SCHEMA_VERSION
   name: GATEWAY_NAME
   properties:
     description: GATEWAY_DESCRIPTION

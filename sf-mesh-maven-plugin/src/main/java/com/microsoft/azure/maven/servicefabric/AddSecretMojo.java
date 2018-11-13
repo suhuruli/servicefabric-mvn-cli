@@ -68,6 +68,7 @@ public class AddSecretMojo extends AbstractMojo
             InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.SECRET_RESOURCE_NAME);
             try {
                 String secretContent = IOUtil.toString(resource, "UTF-8");
+                secretContent = Utils.replaceString(logger, secretContent, "SCHEMA_VERSION", schemaVersion, Constants.SECRET_RESOURCE_NAME);
                 secretContent = Utils.replaceString(logger, secretContent, "SECRET_NAME", secretName, Constants.SECRET_RESOURCE_NAME);
                 secretContent = Utils.replaceString(logger, secretContent, "SECRET_DESCRIPTION", secretDescription, Constants.SECRET_RESOURCE_NAME);
                 secretContent = Utils.replaceString(logger, secretContent, "SECRET_CONTENT_TYPE", secretContentType, Constants.SECRET_RESOURCE_NAME);

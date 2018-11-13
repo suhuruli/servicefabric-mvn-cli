@@ -132,6 +132,7 @@ public class AddServiceMojo extends AbstractMojo
             try {
                 InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.SERVICE_RESOURCE_NAME);
                 String serviceContent = IOUtil.toString(resource, "UTF-8"); 
+                serviceContent = Utils.replaceString(logger, serviceContent, "SCHEMA_VERSION", schemaVersion, Constants.SERVICE_RESOURCE_NAME);
                 serviceContent = Utils.replaceString(logger, serviceContent, "APP_NAME", applicationName, Constants.SERVICE_RESOURCE_NAME);
                 serviceContent = Utils.replaceString(logger, serviceContent, "SERVICE_NAME", serviceName, Constants.SERVICE_RESOURCE_NAME);
                 serviceContent = Utils.replaceString(logger, serviceContent, "SERVICE_DESCRIPTION", serviceDescription, Constants.SERVICE_RESOURCE_NAME);

@@ -51,12 +51,14 @@ public class AddSecretValueMojo extends AbstractMojo
         	throw new MojoFailureException("Service fabric resources folder does not exist. Please run init goal before running this goal!");
         }
         else{
-            if(Utils.checkIfExists(Utils.getPath(appResourcesDirectory, "secretvalue_" + secretValueName + ".yaml"))){
+            String[] secretValueSplit = secretValueName.split("\\", 2);
+            if(Utils.checkIfExists(Utils.getPath(appResourcesDirectory, "secretvalue_" + secretValueSplit[0] + ".yaml"))){
                 throw new MojoFailureException("Secret Value Resource with the specified name already exists");
             }
             InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.SECRET_VALUE_RESOURCE_NAME);
             try {
                 String secretValueContent = IOUtil.toString(resource, "UTF-8");
+                secretValueContent = Utils.replaceString(logger, secretValueContent, "SCHEMA_VERSION", schemaVersion, Constants.SECRET_VALUE_RESOURCE_NAME);
                 secretValueContent = Utils.replaceString(logger, secretValueContent, "SECRET_VALUE_NAME", secretValueName, Constants.SECRET_VALUE_RESOURCE_NAME);
                 secretValueContent = Utils.replaceString(logger, secretValueContent, "SECRET_VALUE", secretValue, Constants.SECRET_VALUE_RESOURCE_NAME);
                 FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "secretvalue_" + secretValueName + ".yaml"), secretValueContent);

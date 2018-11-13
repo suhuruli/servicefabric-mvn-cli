@@ -69,6 +69,7 @@ public class AddNetworkMojo extends AbstractMojo
             InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.NETWORK_RESOURCE_NAME);
             try {
                 String networkContent = IOUtil.toString(resource, "UTF-8");
+                networkContent = Utils.replaceString(logger, networkContent, "SCHEMA_VERSION", schemaVersion, Constants.NETWORK_RESOURCE_NAME);
                 networkContent = Utils.replaceString(logger, networkContent, "NETWORK_NAME", networkName, Constants.NETWORK_RESOURCE_NAME);
                 networkContent = Utils.replaceString(logger, networkContent, "NETWORK_DESCRIPTION", networkDescription, Constants.NETWORK_RESOURCE_NAME);
                 networkContent = Utils.replaceString(logger, networkContent, "ADDRESS_PREFIX", networkAddressPrefix, Constants.NETWORK_RESOURCE_NAME);

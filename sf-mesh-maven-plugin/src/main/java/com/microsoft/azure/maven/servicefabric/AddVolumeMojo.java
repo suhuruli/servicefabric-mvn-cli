@@ -81,11 +81,13 @@ public class AddVolumeMojo extends AbstractMojo
 			InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.VOLUME_RESOURCE_NAME);
 			try {
 				String volumeContent = IOUtil.toString(resource, "UTF-8");
+				volumeContent = Utils.replaceString(logger, volumeContent, "SCHEMA_VERSION", schemaVersion, Constants.VOLUME_RESOURCE_NAME);
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_NAME", volumeName, Constants.VOLUME_RESOURCE_NAME);
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_DESCRIPTION", volumeDescription, Constants.VOLUME_RESOURCE_NAME);
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_PROVIDER", volumeProvider, Constants.VOLUME_RESOURCE_NAME);
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_NAME", volumeAccountName, Constants.VOLUME_RESOURCE_NAME);
 				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_ACCOUNT_KEY", volumeAccountKey, Constants.VOLUME_RESOURCE_NAME);
+				volumeContent = Utils.replaceString(logger, volumeContent, "VOLUME_SHARE_NAME", volumeShareName, Constants.VOLUME_RESOURCE_NAME);
 				FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "volume_" + volumeName + ".yaml"), volumeContent);
 				logger.debug(String.format("Wrote %s volume content to output", volumeName));
 				TelemetryHelper.sendEvent(TelemetryEventType.ADDVOLUME, String.format("Added volume with name: %s", volumeName), logger);
