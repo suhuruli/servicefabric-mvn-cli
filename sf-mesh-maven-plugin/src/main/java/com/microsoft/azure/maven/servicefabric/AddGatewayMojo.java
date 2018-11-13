@@ -13,6 +13,9 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
+/**
+ * Goal which adds a gateway resource to a project.
+ */
 @Mojo(name = "addgateway", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
 public class AddGatewayMojo extends AbstractMojo {
 

@@ -14,6 +14,9 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
 
+/**
+ * Goal which adds a network resource to a project.
+ */
 @Mojo(name = "addnetwork", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
 public class AddNetworkMojo extends AbstractMojo
 {

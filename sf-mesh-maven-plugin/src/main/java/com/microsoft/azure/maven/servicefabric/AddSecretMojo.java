@@ -13,7 +13,9 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
-
+/**
+ * Goal which adds a secret resource to a project.
+ */
 @Mojo(name = "addsecret", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
 public class AddSecretMojo extends AbstractMojo
 {
