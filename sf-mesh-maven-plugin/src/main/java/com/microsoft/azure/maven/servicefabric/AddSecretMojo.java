@@ -16,7 +16,7 @@ import org.codehaus.plexus.util.IOUtil;
 /**
  * Goal which adds a secret resource to a project.
  */
-@Mojo(name = "addsecret", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
+@Mojo(name = "addsecret", defaultPhase = LifecyclePhase.NONE)
 public class AddSecretMojo extends AbstractMojo
 {
     @Parameter(defaultValue = "${project}", required = true, readonly = true)

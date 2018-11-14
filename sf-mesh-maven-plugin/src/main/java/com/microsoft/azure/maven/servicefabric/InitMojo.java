@@ -16,7 +16,7 @@ import java.io.*;
 /**
  * Goal which creates initial application resource of a project.
  */
-@Mojo( name = "init", defaultPhase = LifecyclePhase.PROCESS_RESOURCES )
+@Mojo( name = "init", defaultPhase = LifecyclePhase.NONE )
 public class InitMojo extends AbstractMojo
 {
     /**

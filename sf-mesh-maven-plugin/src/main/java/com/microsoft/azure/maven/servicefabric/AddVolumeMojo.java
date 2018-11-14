@@ -16,7 +16,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 /**
  * Goal which adds a volume resource to a project.
  */
-@Mojo( name = "addvolume", defaultPhase = LifecyclePhase.PROCESS_RESOURCES )
+@Mojo( name = "addvolume", defaultPhase = LifecyclePhase.NONE )
 public class AddVolumeMojo extends AbstractMojo
 {
 

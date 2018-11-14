@@ -18,7 +18,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 /**
  * Goal which adds a service resource to a project.
  */
-@Mojo( name = "addservice", defaultPhase = LifecyclePhase.PROCESS_RESOURCES )
+@Mojo( name = "addservice", defaultPhase = LifecyclePhase.NONE )
 public class AddServiceMojo extends AbstractMojo
 {
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
