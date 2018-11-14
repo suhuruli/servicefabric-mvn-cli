@@ -73,7 +73,7 @@ public class AddNetworkMojo extends AbstractMojo
                 networkContent = Utils.replaceString(logger, networkContent, "NETWORK_NAME", networkName, Constants.NETWORK_RESOURCE_NAME);
                 networkContent = Utils.replaceString(logger, networkContent, "NETWORK_DESCRIPTION", networkDescription, Constants.NETWORK_RESOURCE_NAME);
                 networkContent = Utils.replaceString(logger, networkContent, "ADDRESS_PREFIX", networkAddressPrefix, Constants.NETWORK_RESOURCE_NAME);
-                networkContent = Utils.replaceString(logger, networkContent, "NETWORK_KIND", networkName, Constants.NETWORK_RESOURCE_NAME);
+                networkContent = Utils.replaceString(logger, networkContent, "NETWORK_KIND", networkKind, Constants.NETWORK_RESOURCE_NAME);
                 FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "network_" + networkName + ".yaml"), networkContent);
 				logger.debug(String.format("Wrote %s network content to output", networkName));
                 TelemetryHelper.sendEvent(TelemetryEventType.ADDNETWORK, String.format("Added network with name: %s", networkName), logger);
