@@ -1,5 +1,6 @@
+## Service Definition ##
 application:
-  schemaVersion: 1.0.0-preview2
+  schemaVersion: SCHEMA_VERSION
   name: APP_NAME
   properties:  
     services:
@@ -18,3 +19,7 @@ application:
                   cpu: CPU_USAGE
                   memoryInGB: MEMORY_USAGE
           replicaCount: REPLICA_COUNT
+          networkRefs:
+          - name: NETWORK_NAME
+            endpointRefs:
+            - name: LISTENER_NAME

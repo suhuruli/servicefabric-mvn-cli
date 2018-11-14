@@ -1,6 +1,6 @@
 ## App Definition ##
 application:
-  schemaVersion: 1.0.0-preview2
+  schemaVersion: SCHEMA_VERSION
   name: APP_NAME
   properties:
     description: APP_DESCRIPTION 

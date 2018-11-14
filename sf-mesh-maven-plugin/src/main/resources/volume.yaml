@@ -1,5 +1,6 @@
+## Volume Definition ##
 volume:
-  schemaVersion: 1.0.0-preview2
+  schemaVersion: SCHEMA_VERSION
   name: VOLUME_NAME
   properties:
     description: VOLUME_DESCRIPTION

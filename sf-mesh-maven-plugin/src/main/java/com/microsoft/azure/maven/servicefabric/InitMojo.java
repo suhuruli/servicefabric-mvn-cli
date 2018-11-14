@@ -16,9 +16,14 @@ import java.io.*;
 /**
  * Goal which creates initial application resource of a project.
  */
-@Mojo( name = "init", defaultPhase = LifecyclePhase.PROCESS_RESOURCES )
+@Mojo( name = "init", defaultPhase = LifecyclePhase.NONE )
 public class InitMojo extends AbstractMojo
 {
+    /**
+     * schema version of the network yaml to be generated
+    */
+    @Parameter(property = "schemaVersion", defaultValue = Constants.DEFAULT_SCHEMA_VERSION)
+	String schemaVersion;
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
@@ -32,7 +37,7 @@ public class InitMojo extends AbstractMojo
     /**
      * Description of the application
     */
-    @Parameter(property = "applicationDescription", defaultValue = Constants.DefaultApplicationDescription)
+    @Parameter(property = "applicationDescription", defaultValue = Constants.DEFAULT_APPLICATION_DESCRIPTION)
     String applicationDescription;
 
     private Log logger  = getLog();
@@ -50,10 +55,10 @@ public class InitMojo extends AbstractMojo
             Utils.createDirectory(logger, appResourcesDirectory);
         }
         try {
-            InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.ApplicationResourceName);
+            InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.APPLICATION_RESOURCE_NAME);
             String appContent = IOUtil.toString(resource, "UTF-8"); 
-            appContent = Utils.replaceString(logger, appContent, "APP_NAME", applicationName, Constants.ApplicationResourceName);
-            appContent = Utils.replaceString(logger, appContent, "APP_DESCRIPTION", applicationDescription, Constants.ApplicationResourceName);
+            appContent = Utils.replaceString(logger, appContent, "APP_NAME", applicationName, Constants.APPLICATION_RESOURCE_NAME);
+            appContent = Utils.replaceString(logger, appContent, "APP_DESCRIPTION", applicationDescription, Constants.APPLICATION_RESOURCE_NAME);
             String appYamlPath = Utils.getPath(appResourcesDirectory, "app_" + applicationName + ".yaml");
             if(Utils.checkIfExists(appYamlPath)){
                 throw new MojoFailureException(String.format("App resource with the name %s already exists", applicationName));
@@ -61,8 +66,7 @@ public class InitMojo extends AbstractMojo
             else{
                 FileUtils.fileWrite(appYamlPath, appContent);
             }
-            logger.debug("Wrote content to output");
-            logger.debug("Adding Service");
+            logger.debug(String.format("Wrote %s application content to output", applicationName));
             TelemetryHelper.sendEvent(TelemetryEventType.INIT, String.format("Added application with name: %s", applicationName), logger);
 		} catch (IOException e) {
             logger.error(e);

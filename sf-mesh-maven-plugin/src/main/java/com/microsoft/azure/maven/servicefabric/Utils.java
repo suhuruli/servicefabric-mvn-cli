@@ -1,9 +1,6 @@
 package com.microsoft.azure.maven.servicefabric;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -12,19 +9,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.Map;
-
-import javax.rmi.CORBA.Util;
 
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -160,51 +150,12 @@ public class Utils
         }
     }
 
-    public static void connecttolocalcluster(Log logger, String ipString, String port) throws MojoFailureException{
-        Utils.executeCommand(logger, "sfctl cluster select --endpoint " + "http://" + ipString + ":" + port);
+    public static void connecttounsecurecluster(Log logger, String endpoint) throws MojoFailureException{
+        Utils.executeCommand(logger, "sfctl cluster select --endpoint " + endpoint);
     }
 
-    public static void checkdotnetinstallation(Log logger) throws MojoFailureException{
-        Utils.executeCommand(logger, "dotnet --version");
-    }
-
-    public static String checkmergetoolpresence(Log logger) throws MojoFailureException{
-        String localRepoPath;
-        if(Utils.isWindows()){
-            localRepoPath = Utils.executeCommand(logger, "mvn help:evaluate -Dexpression=settings.localRepository -DforceStdout | findstr repository");
-        }
-        else{
-            localRepoPath = Utils.executeCommand(logger, new String[]{"sh", "-c", "mvn help:evaluate -Dexpression=settings.localRepository -DforceStdout | grep repository"});
-        }
-
-        String toolPath = Utils.getPath(localRepoPath.replace("\n", "").replace("\r", ""), "SfSbzYamlMergeCore");
-        Utils.checkIfExists(toolPath);
-        return toolPath;
-    }
-
-    public static String listFilesAndFilesSubDirectories(Log logger, String directoryName){
-        File directory = new File(directoryName);
-        //get all the files from a directory
-        File[] fList = directory.listFiles();
-        String inputFiles="";
-        for (File file : fList){
-            if (file.isFile()){
-                String fileName = file.getName();
-                int index = fileName.lastIndexOf('.');
-                String fileExtension=null;
-                if(index != -1){
-                    fileExtension = fileName.substring(index);
-                }
-                if(!fileExtension.equals(".json")){
-                    inputFiles = inputFiles.concat(String.format(" /inputFileName:\"%s\"", file.getAbsolutePath()));
-                }
-                logger.debug("Function" + inputFiles);
-            } else if (file.isDirectory()){
-                inputFiles = inputFiles.concat(listFilesAndFilesSubDirectories(logger, file.getAbsolutePath()));
-                logger.debug("Function" + inputFiles);
-            }
-        }
-        return inputFiles;
+    public static void connecttosecurecluster(Log logger, String endpoint, String pempath) throws MojoFailureException{
+        Utils.executeCommand(logger, "sfctl cluster select --endpoint " + endpoint + "--pem " + pempath);
     }
 
     public static String getOS(){
@@ -217,63 +168,6 @@ public class Utils
         String OS = getOS();
 		return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") >= 0|| OS.indexOf("mac") >= 0 );	
 	}
-
-    public static String getResourceName(String fileName){
-        String resourceName=fileName.split("_")[3];
-        return resourceName.substring(0, resourceName.length() - 5);
-    }
-
-    public static ResourceType getResourceType(String fileName){
-        return ResourceType.valueOf(fileName.split("_")[2]);
-    }
-    public static void generatejsonfrommergetool(Log logger, String deploymentType, MavenProject project, String outputPath) throws MojoFailureException {
-        String toolPath = Utils.checkmergetoolpresence(logger);
-        String toolExePath = Utils.getPath(toolPath, "SfSbzYamlMerge");
-        String outputFormat = null;
-        String folderName = null;
-        String inputFiles = listFilesAndFilesSubDirectories(logger, getServicefabricResourceDirectory(logger, project));
-        logger.debug("inputFiles:" + inputFiles);
-        if(deploymentType.equalsIgnoreCase(Constants.MeshDeploymentType)){
-            outputFormat = "SF_SBZ_RP_JSON";
-            folderName = "cloud";
-        }
-        else{
-            outputFormat = "SF_SBZ_JSON";
-            folderName = "local";
-        }
-        outputPath = Utils.getPath(Utils.getServicefabricResourceDirectory(logger, project), folderName);
-        if(Utils.checkIfExists(outputPath)){
-            Utils.deleteFileOrDirectory(outputPath, logger);
-        }
-        Utils.createDirectory(logger, outputPath);
-        if(isWindows()){
-            Utils.executeCommand(logger, String.format("%s.exe %s /outputFormat:%s /out:%s",toolExePath, inputFiles, outputFormat, outputPath));
-        }
-        else{
-            Utils.executeCommand(logger, String.format("chmod a+x %s", toolExePath));
-            Utils.executeCommand(logger, new String[]{"sh", "-c", String.format("%s %s /outputFormat:%s /out:%s",toolExePath, inputFiles, outputFormat, outputPath)});
-        }
-    }
-
-    public static String getResourceDescription(File file, Log logger) throws MojoFailureException {
-        JSONParser jsonParser = new JSONParser();
-        try {
-            FileReader reader = new FileReader(file);
-            JSONObject obj = (JSONObject) jsonParser.parse(reader);
-            logger.info(obj.get("description").toString());
-            return obj.get("description").toString();
-
-        } catch (FileNotFoundException e) {
-            logger.error(e);
-            throw new MojoFailureException(String.format("%s File not found", file.getName()));
-        } catch (IOException e) {
-            logger.error(e);
-            throw new MojoFailureException(String.format("%s IOException", file.getName()));
-        } catch (ParseException e) {
-            logger.error(e);
-            throw new MojoFailureException(String.format("%s ParseException", file.getName()));
-		}
-    }
 
     @SuppressWarnings("unchecked")
     public static LinkedHashMap<String, Object> stringToYaml(Log logger, String content) throws MojoFailureException {

@@ -17,7 +17,7 @@ public class TelemetryHelper {
 			client.flush();
 			Thread.sleep(1500);
 		} catch (InterruptedException e) {
-			logger.error("Failed sending telemetry event");
+			logger.error(String.format("Failed sending telemetry event of type %s", type.getValue()));
 		}
 		return true;
 	}

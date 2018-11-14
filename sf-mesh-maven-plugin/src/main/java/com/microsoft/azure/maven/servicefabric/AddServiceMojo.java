@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Random;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
@@ -19,7 +18,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 /**
  * Goal which adds a service resource to a project.
  */
-@Mojo( name = "addservice", defaultPhase = LifecyclePhase.PROCESS_RESOURCES )
+@Mojo( name = "addservice", defaultPhase = LifecyclePhase.NONE )
 public class AddServiceMojo extends AbstractMojo
 {
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
@@ -28,7 +27,7 @@ public class AddServiceMojo extends AbstractMojo
     /**
      * schema version of the network yaml to be generated
     */
-    @Parameter(property = "schemaVersion", defaultValue = Constants.DefaultSchemaVersion)
+    @Parameter(property = "schemaVersion", defaultValue = Constants.DEFAULT_SCHEMA_VERSION)
     String schemaVersion;
 
     /**
@@ -52,61 +51,61 @@ public class AddServiceMojo extends AbstractMojo
     /**
      * Description of the service
     */
-    @Parameter(property = "serviceDescription", defaultValue = Constants.DefaultServiceDescription)
+    @Parameter(property = "serviceDescription", defaultValue = Constants.DEFAULT_SERVICE_DESCRIPTION)
     String serviceDescription;
 
     /**
      * OS environment on which this service is deployed
     */
-    @Parameter(property = "osType", defaultValue = Constants.DefaultOS)
+    @Parameter(property = "osType", defaultValue = Constants.DEFAULT_OS)
     String osType;
     
     /**
      * Name of the code package
     */
-    @Parameter(property = "codePackageName", defaultValue = Constants.DefaultCodePackageName)
+    @Parameter(property = "codePackageName", defaultValue = Constants.DEFAULT_CODE_PACKAGE_NAME)
     String codePackageName;
 
     /**
      * Name of the listener
     */
-    @Parameter(property = "listenerName", defaultValue = Constants.DefaultListenerName)
+    @Parameter(property = "listenerName", defaultValue = Constants.DEFAULT_LISTENER_NAME)
     String listenerName;
     
     /**
      * Port to expose of the container
     */
-    @Parameter(property = "listenerPort", defaultValue = Constants.DefaultPortNumber)
+    @Parameter(property = "listenerPort")
     String listenerPort;
 
     /**
      * Max CPU usage (in cores) of the container
     */
-    @Parameter(property = "cpuUsage", defaultValue = Constants.DefaultCpuUsage)
+    @Parameter(property = "cpuUsage", defaultValue = Constants.DEFAULT_CPU_USAGE)
     String cpuUsage;
 
     /**
      * Max Memory usage (in GB) of the container
     */
-    @Parameter(property = "memoryUsage", defaultValue = Constants.DefaultMemoryUsage)
+    @Parameter(property = "memoryUsage", defaultValue = Constants.DEFAULT_MEMORY_USAGE)
     String memoryUsage;
 
     /**
      * Replica count of the container
     */
-    @Parameter(property = "replicaCount", defaultValue = Constants.DefaultReplicaCount)
+    @Parameter(property = "replicaCount", defaultValue = Constants.DEFAULT_REPLICA_COUNT)
     String replicaCount;    
 
     /**
      * Network resource reference in which the container should be deployed
     */
-    @Parameter(property = "networkRef", defaultValue = Constants.DefaultNetworkRefName, alias= "networkName")
+    @Parameter(property = "networkRef", alias= "networkName")
     String networkRef; 
 
     /**
      * Enviromental variables suppiled in key1:val1,key2:val2 format
      */
-    @Parameter(property = "enviromentalVariables", defaultValue = Constants.DefaultEnvironmentalVariables)
+    @Parameter(property = "enviromentalVariables", defaultValue = Constants.DEFAULT_ENVIRONMENTAL_VARIABLES)
     String enviromentalVariables;
 
     private Log logger  = getLog();
@@ -131,47 +130,42 @@ public class AddServiceMojo extends AbstractMojo
                 throw new MojoFailureException("Service Resource with the specified name already exists");
             }
             try {
-                InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.ServiceResourceName);
+                InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.SERVICE_RESOURCE_NAME);
                 String serviceContent = IOUtil.toString(resource, "UTF-8"); 
-                serviceContent = Utils.replaceString(logger, serviceContent, "APP_NAME", applicationName, Constants.ServiceResourceName);
-                serviceContent = Utils.replaceString(logger, serviceContent, "SERVICE_NAME", serviceName, Constants.ServiceResourceName);
-                serviceContent = Utils.replaceString(logger, serviceContent, "SERVICE_DESCRIPTION", serviceDescription, Constants.ServiceResourceName);
-                if(osType.equals(Constants.DefaultOS)){
+                serviceContent = Utils.replaceString(logger, serviceContent, "SCHEMA_VERSION", schemaVersion, Constants.SERVICE_RESOURCE_NAME);
+                serviceContent = Utils.replaceString(logger, serviceContent, "APP_NAME", applicationName, Constants.SERVICE_RESOURCE_NAME);
+                serviceContent = Utils.replaceString(logger, serviceContent, "SERVICE_NAME", serviceName, Constants.SERVICE_RESOURCE_NAME);
+                serviceContent = Utils.replaceString(logger, serviceContent, "SERVICE_DESCRIPTION", serviceDescription, Constants.SERVICE_RESOURCE_NAME);
+                if(osType.equals(Constants.DEFAULT_OS)){
                     if(Utils.isLinux()){
-                        osType = Constants.LinuxOS;
+                        osType = Constants.LINUX_OS;
                     }
                     else{
-                        osType = Constants.WindowsOS;
+                        osType = Constants.WINDOWS_OS;
                     }
                 }
-                serviceContent = Utils.replaceString(logger, serviceContent, "OS_TYPE", osType, Constants.ServiceResourceName);
-                if(codePackageName.equals(Constants.DefaultCodePackageName)){
+                serviceContent = Utils.replaceString(logger, serviceContent, "OS_TYPE", osType, Constants.SERVICE_RESOURCE_NAME);
+                if(codePackageName.equals(Constants.DEFAULT_CODE_PACKAGE_NAME)){
                     codePackageName = serviceName + "CodePackage";
                 }
-                serviceContent = Utils.replaceString(logger, serviceContent, "CODE_PACKAGE_NAME", codePackageName, Constants.ServiceResourceName);
-                serviceContent = Utils.replaceString(logger, serviceContent, "DOCKER_IMAGE", imageName, Constants.ServiceResourceName);
-                if(listenerName.equals(Constants.DefaultListenerName)){
+                serviceContent = Utils.replaceString(logger, serviceContent, "CODE_PACKAGE_NAME", codePackageName, Constants.SERVICE_RESOURCE_NAME);
+                serviceContent = Utils.replaceString(logger, serviceContent, "DOCKER_IMAGE", imageName, Constants.SERVICE_RESOURCE_NAME);
+                if(listenerName.equals(Constants.DEFAULT_LISTENER_NAME)){
                     listenerName = serviceName + "Listener";
                 }
-                serviceContent = Utils.replaceString(logger, serviceContent, "LISTENER_NAME", listenerName, Constants.ServiceResourceName);
-                if(listenerPort.equals(Constants.DefaultPortNumber)){
-                    Random rand = new Random();
-                    int port = rand.nextInt(65535 - 49152 + 1) + 49152; 
-                    listenerPort = Integer.toString(port); 
-                }
-                serviceContent = Utils.replaceString(logger, serviceContent, "LISTENER_PORT", listenerPort, Constants.ServiceResourceName);
-                serviceContent = Utils.replaceString(logger, serviceContent, "CPU_USAGE", cpuUsage, Constants.ServiceResourceName);
-                serviceContent = Utils.replaceString(logger, serviceContent, "MEMORY_USAGE", memoryUsage, Constants.ServiceResourceName);
-                serviceContent = Utils.replaceString(logger, serviceContent, "REPLICA_COUNT", replicaCount, Constants.ServiceResourceName);
-                if(!networkRef.equals(Constants.DefaultNetworkRefName)){
-                    serviceContent = AddNetworkRefs(logger, serviceContent, networkRef);
-                }
-                if(!enviromentalVariables.equals(Constants.DefaultEnvironmentalVariables)){
+                serviceContent = Utils.replaceString(logger, serviceContent, "LISTENER_NAME", listenerName, Constants.SERVICE_RESOURCE_NAME);
+                serviceContent = Utils.replaceString(logger, serviceContent, "LISTENER_PORT", listenerPort, Constants.SERVICE_RESOURCE_NAME);
+                serviceContent = Utils.replaceString(logger, serviceContent, "CPU_USAGE", cpuUsage, Constants.SERVICE_RESOURCE_NAME);
+                serviceContent = Utils.replaceString(logger, serviceContent, "MEMORY_USAGE", memoryUsage, Constants.SERVICE_RESOURCE_NAME);
+                serviceContent = Utils.replaceString(logger, serviceContent, "REPLICA_COUNT", replicaCount, Constants.SERVICE_RESOURCE_NAME);
+                serviceContent = Utils.replaceString(logger, serviceContent, "NETWORK_NAME", networkRef, Constants.SERVICE_RESOURCE_NAME);
+
+                if(!enviromentalVariables.equals(Constants.DEFAULT_ENVIRONMENTAL_VARIABLES)){
                     serviceContent = AddEnvironmentVariables(logger, serviceContent, enviromentalVariables);
                 }
                 Utils.createDirectory(logger, serviceDirectory);
                 FileUtils.fileWrite(Utils.getPath(serviceDirectory, "service_" + serviceName + ".yaml"), serviceContent);
-                logger.debug("Wrote content to output");
+                logger.debug(String.format("Wrote %s service content to output", serviceName));
                 TelemetryHelper.sendEvent(TelemetryEventType.ADDSERVICE, String.format("Added service with name: %s", serviceName), logger);
             } catch (IOException e) {
                 logger.error(e);
@@ -179,28 +173,6 @@ public class AddServiceMojo extends AbstractMojo
             }
     
         }
-    }
-    @SuppressWarnings("unchecked")
-    public String AddNetworkRefs(Log logger, String content, String networkName) throws MojoFailureException{
-       
-       LinkedHashMap<String, Object> networkRef = new LinkedHashMap<String, Object>();
-       networkRef.put("name", networkName);
-       ArrayList<LinkedHashMap<String, Object>> networkRefs = new ArrayList<LinkedHashMap<String, Object>>();
-       networkRefs.add(networkRef);
-       LinkedHashMap<String, Object> map = Utils.stringToYaml(logger, content);
-       LinkedHashMap<String, Object> application = (LinkedHashMap<String, Object>)map.get("application");
-       LinkedHashMap<String, Object> applicationProperties = (LinkedHashMap<String, Object>)application.get("properties");
-       ArrayList<LinkedHashMap<String, Object>> services = (ArrayList<LinkedHashMap<String, Object>>)applicationProperties.get("services");
-       LinkedHashMap<String, Object> service = services.get(0);
-       LinkedHashMap<String, Object> serviceProperties = (LinkedHashMap<String, Object>)service.get("properties");
-       serviceProperties.put("networkRefs", networkRefs);
-       service.replace("properties", serviceProperties);
-       services.remove(0);
-       services.add(0, service);
-       applicationProperties.replace("properties", services);
-       application.replace("application", applicationProperties);
-       map.replace("application", application);
-       return Utils.yamlToString(map);
     }
 
     @SuppressWarnings("unchecked")
@@ -221,6 +193,8 @@ public class AddServiceMojo extends AbstractMojo
         LinkedHashMap<String, Object> serviceProperties = (LinkedHashMap<String, Object>)service.get("properties");
         ArrayList<LinkedHashMap<String, Object>> codePackages = (ArrayList<LinkedHashMap<String, Object>>)serviceProperties.get("codePackages");
         LinkedHashMap<String, Object> codePackage = codePackages.get(0);
+
+        // TODO: Understand the reason why we need to remove instead of replace
         codePackage.put("environmentVariables", envList);
         codePackages.remove(0);
         codePackages.add(codePackage);

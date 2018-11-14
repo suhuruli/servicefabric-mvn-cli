@@ -14,7 +14,10 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
 
-@Mojo(name = "addnetwork", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
+/**
+ * Goal which adds a network resource to a project.
+ */
+@Mojo(name = "addnetwork", defaultPhase = LifecyclePhase.NONE)
 public class AddNetworkMojo extends AbstractMojo
 {
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
@@ -23,7 +26,7 @@ public class AddNetworkMojo extends AbstractMojo
     /**
      * schema version of the network yaml to be generated
     */
-    @Parameter(property = "schemaVersion", defaultValue = Constants.DefaultSchemaVersion)
+    @Parameter(property = "schemaVersion", defaultValue = Constants.DEFAULT_SCHEMA_VERSION)
     String schemaVersion;
 
     /**
@@ -35,13 +38,13 @@ public class AddNetworkMojo extends AbstractMojo
     /**
      * Description of the network
     */
-    @Parameter(property = "networkDescription", defaultValue= Constants.DefaultNetworkDescription)
+    @Parameter(property = "networkDescription", defaultValue= Constants.DEFAULT_NETWORK_DESCRIPTION)
     String networkDescription;
 
     /**
      * Kind of the network
      */
-    @Parameter(property = "networkKind", defaultValue= Constants.DefaultNetworkKind)
+    @Parameter(property = "networkKind", defaultValue= Constants.DEFAULT_NETWORK_KIND)
     String networkKind;
 
     /**
@@ -63,15 +66,16 @@ public class AddNetworkMojo extends AbstractMojo
             if(Utils.checkIfExists(Utils.getPath(appResourcesDirectory, "network_" + networkName + ".yaml"))){
                 throw new MojoFailureException("Network Resource with the specified name already exists");
             }
-            InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.NetworkResourceName);
+            InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.NETWORK_RESOURCE_NAME);
             try {
                 String networkContent = IOUtil.toString(resource, "UTF-8");
-                networkContent = Utils.replaceString(logger, networkContent, "NETWORK_NAME", networkName, Constants.NetworkResourceName);
-                networkContent = Utils.replaceString(logger, networkContent, "NETWORK_DESCRIPTION", networkDescription, Constants.NetworkResourceName);
-                networkContent = Utils.replaceString(logger, networkContent, "ADDRESS_PREFIX", networkAddressPrefix, Constants.NetworkResourceName);
-                networkContent = Utils.replaceString(logger, networkContent, "NETWORK_KIND", networkName, Constants.NetworkResourceName);
+                networkContent = Utils.replaceString(logger, networkContent, "SCHEMA_VERSION", schemaVersion, Constants.NETWORK_RESOURCE_NAME);
+                networkContent = Utils.replaceString(logger, networkContent, "NETWORK_NAME", networkName, Constants.NETWORK_RESOURCE_NAME);
+                networkContent = Utils.replaceString(logger, networkContent, "NETWORK_DESCRIPTION", networkDescription, Constants.NETWORK_RESOURCE_NAME);
+                networkContent = Utils.replaceString(logger, networkContent, "ADDRESS_PREFIX", networkAddressPrefix, Constants.NETWORK_RESOURCE_NAME);
+                networkContent = Utils.replaceString(logger, networkContent, "NETWORK_KIND", networkKind, Constants.NETWORK_RESOURCE_NAME);
                 FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "network_" + networkName + ".yaml"), networkContent);
-				logger.debug("Wrote content to output");
+				logger.debug(String.format("Wrote %s network content to output", networkName));
                 TelemetryHelper.sendEvent(TelemetryEventType.ADDNETWORK, String.format("Added network with name: %s", networkName), logger);
             }
             catch (IOException e) {

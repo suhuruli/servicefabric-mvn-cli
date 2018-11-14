@@ -4,11 +4,19 @@ public enum TelemetryEventType {
     INIT("Java.MavenCLI.Init"),
     ADDSERVICE("Java.MavenCLI.AddService"),
     ADDVOLUME("Java.MavenCLI.AddVolume"),
+    ADDGATEWAY("Java.MavenCLI.AddGateway"),
+    ADDNETWORK("Java.MavenCLI.AddNetwork"),
+    ADDSECRET("Java.MavenCLI.AddSecret"),
+    ADDSECRETVALUE("Java.MavenCLI.AddSecretValue"),
     DEPLOYLOCAL("Java.MavenCLI.DeployLocal"),
     DEPLOYMESH("Java.MavenCLI.DeployMesh"),
-    REMOVE("Java.MavenCLI.Remove"),
-    ADDNETWORK("Java.MavenCLI.AddNetwork"),
-    ADDGATEWAY("Java.MavenCLI.AddGateway");
+    DEPLOYSFRP("Java.MavenCLI.DeploySFRP"),
+    REMOVEAPP("Java.MavenCLI.RemoveApp"),
+    REMOVENETWORK("Java.MavenCLI.RemoveNetwork"),
+    REMOVEGATEWAY("Java.MavenCLI.RemoveGateway"),
+    REMOVEVOLUME("Java.MavenCLI.RemoveVolume"),
+    REMOVESECRET("Java.MavenCLI.RemoveSecret"),
+    REMOVESECRETVALUE("Java.MavenCLI.RemoveSecretValue"),;
 
     private final String value;
 

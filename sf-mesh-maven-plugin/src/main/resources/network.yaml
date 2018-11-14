@@ -1,5 +1,6 @@
+## Network Definition ##
 network:
-  schemaVersion: 1.0.0-preview2
+  schemaVersion: SCHEMA_VERSION
   name: NETWORK_NAME
   properties:
     description: NETWORK_DESCRIPTION

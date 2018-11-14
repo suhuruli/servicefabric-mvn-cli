@@ -8,10 +8,10 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugin.logging.Log;
 /**
- * Goal which deploys application to mesh
+ * Goal which deploys the application to a cluster
  */
-@Mojo( name = "deploy", defaultPhase = LifecyclePhase.NONE )
-public class DeployMojo extends AbstractMojo
+@Mojo( name = "deploytocluster", defaultPhase = LifecyclePhase.NONE )
+public class DeployToClusterMojo extends AbstractMojo
 {
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     MavenProject project;
@@ -23,16 +23,16 @@ public class DeployMojo extends AbstractMojo
     String inputYamlFilePaths;
 
     /**
-     * Name of the resource group
+     * URL of the cluster in which this application should be deployed.
     */
-    @Parameter(property = "resourceGroup", defaultValue = Constants.DEFAULT_RESOURCE_GROUP)
-    String resourceGroup;
+    @Parameter(property = "clusterEndpoint", defaultValue = Constants.DEFAULT_CLUSTER_ENDPOINT)
+    String clusterEndpoint;
 
     /**
-     * Location of the resource group
-    */
-    @Parameter(property = "location", defaultValue = Constants.DEFAULT_LOCATION)
-    String location;
+     * Location of pem file.
+     */
+    @Parameter(property = "pemFilePath", defaultValue = Constants.DEFAULT_PEM_FILE_PATH)
+    String pemFilePath;
 
     public Log logger  = getLog();
 
@@ -45,19 +45,16 @@ public class DeployMojo extends AbstractMojo
         if(inputYamlFilePaths.equals(Constants.SERVICE_FABRIC_RESOURCES_PATH)){
             inputYamlFilePaths = Utils.getServicefabricResourceDirectory(logger, project);
         }
-
-        Utils.checkazinstallation(logger);
-
-        if(resourceGroup.equals(Constants.DEFAULT_RESOURCE_GROUP)){
-            throw new MojoFailureException("Resource group is not provided. Please provide a resource group name");
+        Utils.checksfctlinstallation(logger);
+        if(pemFilePath.equalsIgnoreCase(Constants.DEFAULT_PEM_FILE_PATH)){
+            Utils.connecttounsecurecluster(logger, clusterEndpoint);
+            Utils.executeCommand(logger, "sfctl mesh deployment create --input-yaml-file-paths " + inputYamlFilePaths);
+            TelemetryHelper.sendEvent(TelemetryEventType.DEPLOYLOCAL, String.format("Deployed application locally"), logger);
         }
-
-        // Create resource group
-        logger.info("Creating Resource Group");
-        Utils.executeCommand(logger, String.format("az group create --name %s --location %s", resourceGroup, location));
-        // Perform deployment
-        logger.info("Performing deployment");
-        Utils.executeCommand(logger, String.format("az mesh deployment create --resource-group %s --input-yaml-file-paths %s  --parameters \"{'location': {'value': '%s'}}\"", resourceGroup, inputYamlFilePaths, location));
-        TelemetryHelper.sendEvent(TelemetryEventType.DEPLOYMESH, String.format("Deployed application on mesh"), logger);
+        else{
+            Utils.connecttosecurecluster(logger, clusterEndpoint, pemFilePath);
+            Utils.executeCommand(logger, "sfctl mesh deployment create --input-yaml-file-paths " + inputYamlFilePaths);
+            TelemetryHelper.sendEvent(TelemetryEventType.DEPLOYSFRP, String.format("Deployed application to SFRP"), logger);
+        }
     }
 }

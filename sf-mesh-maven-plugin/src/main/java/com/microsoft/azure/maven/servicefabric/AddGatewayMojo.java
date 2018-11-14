@@ -13,7 +13,10 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
-@Mojo(name = "addgateway", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
+/**
+ * Goal which adds a gateway resource to a project.
+ */
+@Mojo(name = "addgateway", defaultPhase = LifecyclePhase.NONE)
 public class AddGatewayMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
@@ -22,7 +25,7 @@ public class AddGatewayMojo extends AbstractMojo {
     /**
      * schema version of the gateway yaml to be generated
     */
-    @Parameter(property = "schemaVersion", defaultValue = Constants.DefaultSchemaVersion)
+    @Parameter(property = "schemaVersion", defaultValue = Constants.DEFAULT_SCHEMA_VERSION)
     String schemaVersion;
     
 
@@ -35,7 +38,7 @@ public class AddGatewayMojo extends AbstractMojo {
     /**
      * Description of the gateway
     */
-    @Parameter(property = "gatewayDescription", defaultValue= Constants.DefaultGatewayDescription)
+    @Parameter(property = "gatewayDescription", defaultValue= Constants.DEFAULT_GATEWAY_DESCRIPTION)
     String gatewayDescription;
 
     /**
@@ -53,7 +56,7 @@ public class AddGatewayMojo extends AbstractMojo {
     /**
      * Name of the exposed endpoint
     */
-    @Parameter(property = "tcpName", defaultValue = Constants.DefaultTcpName)
+    @Parameter(property = "tcpName", defaultValue = Constants.DEFAULT_TCP_NAME)
     String tcpName;
 
     /**
@@ -95,24 +98,25 @@ public class AddGatewayMojo extends AbstractMojo {
             if(Utils.checkIfExists(Utils.getPath(appResourcesDirectory, "gateway_" + gatewayName + ".yaml"))){
                 throw new MojoFailureException("Gateway Resource with the specified name already exists");
             }
-            InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.GatewayResourceName);
+            InputStream resource = this.getClass().getClassLoader().getResourceAsStream(Constants.GATEWAY_RESOURCE_NAME);
 
             try{
                 String gatewayContent = IOUtil.toString(resource, "UTF-8");
-                gatewayContent = Utils.replaceString(logger, gatewayContent, "GATEWAY_NAME", gatewayName, Constants.GatewayResourceName);
-                gatewayContent = Utils.replaceString(logger, gatewayContent, "GATEWAY_DESCRIPTION", gatewayDescription, Constants.GatewayResourceName);
-                gatewayContent = Utils.replaceString(logger, gatewayContent, "SOURCE_NETWORK", sourceNetwork, Constants.GatewayResourceName);
-                gatewayContent = Utils.replaceString(logger, gatewayContent, "DESTINATION_NETWORK", destinationNetwork, Constants.GatewayResourceName);
-                if(tcpName.equals(Constants.DefaultTcpName)){
+                gatewayContent = Utils.replaceString(logger, gatewayContent, "SCHEMA_VERSION", schemaVersion, Constants.GATEWAY_RESOURCE_NAME);
+                gatewayContent = Utils.replaceString(logger, gatewayContent, "GATEWAY_NAME", gatewayName, Constants.GATEWAY_RESOURCE_NAME);
+                gatewayContent = Utils.replaceString(logger, gatewayContent, "GATEWAY_DESCRIPTION", gatewayDescription, Constants.GATEWAY_RESOURCE_NAME);
+                gatewayContent = Utils.replaceString(logger, gatewayContent, "SOURCE_NETWORK", sourceNetwork, Constants.GATEWAY_RESOURCE_NAME);
+                gatewayContent = Utils.replaceString(logger, gatewayContent, "DESTINATION_NETWORK", destinationNetwork, Constants.GATEWAY_RESOURCE_NAME);
+                if(tcpName.equals(Constants.DEFAULT_TCP_NAME)){
                     tcpName = listenerName+ "Config";
                 }
-                gatewayContent = Utils.replaceString(logger, gatewayContent, "TCP_NAME", tcpName, Constants.GatewayResourceName);
-                gatewayContent = Utils.replaceString(logger, gatewayContent, "PORT", tcpPort, Constants.GatewayResourceName);
-                gatewayContent = Utils.replaceString(logger, gatewayContent, "APPLICATION_NAME", applicationName, Constants.GatewayResourceName);
-                gatewayContent = Utils.replaceString(logger, gatewayContent, "SERVICE_NAME", serviceName, Constants.GatewayResourceName);
-                gatewayContent = Utils.replaceString(logger, gatewayContent, "LISTENER_NAME", listenerName, Constants.GatewayResourceName);
+                gatewayContent = Utils.replaceString(logger, gatewayContent, "TCP_NAME", tcpName, Constants.GATEWAY_RESOURCE_NAME);
+                gatewayContent = Utils.replaceString(logger, gatewayContent, "PORT", tcpPort, Constants.GATEWAY_RESOURCE_NAME);
+                gatewayContent = Utils.replaceString(logger, gatewayContent, "APPLICATION_NAME", applicationName, Constants.GATEWAY_RESOURCE_NAME);
+                gatewayContent = Utils.replaceString(logger, gatewayContent, "SERVICE_NAME", serviceName, Constants.GATEWAY_RESOURCE_NAME);
+                gatewayContent = Utils.replaceString(logger, gatewayContent, "LISTENER_NAME", listenerName, Constants.GATEWAY_RESOURCE_NAME);
                 FileUtils.fileWrite(Utils.getPath(appResourcesDirectory, "gateway_" + gatewayName + ".yaml"), gatewayContent);
-				logger.debug("Wrote content to output");
+				logger.debug(String.format("Wrote %s gateway content to output", gatewayName));
                 TelemetryHelper.sendEvent(TelemetryEventType.ADDGATEWAY, String.format("Added gateway with name: %s", gatewayName), logger);
             }
             catch (IOException e) {
